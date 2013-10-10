@@ -104,5 +104,6 @@
     <!-- Deprecated plugins element. Remove in 3.0 -->
     <plugins>
         <plugin name="org.apache.cordova.facebook.Connect" value="org.apache.cordova.facebook.ConnectPlugin" />
+        <plugin name="PicoGoogleIAB" value="com.baroq.pico.google.InAppBilling" />
     </plugins>
 </widget>

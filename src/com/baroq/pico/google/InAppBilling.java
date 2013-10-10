@@ -1,5 +1,5 @@
 // ref: http://developer.android.com/google/play/billing/billing_integrate.html
-package com.baroq.pico;
+package com.baroq.pico.google;
 
 import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.PluginResult;
@@ -16,10 +16,15 @@ import android.util.Log;
 
 import com.android.vending.billing.IInAppBillingService;
 
-public class GoogleInAppBilling extends CordovaPlugin{
+public class InAppBilling extends CordovaPlugin{
     private static final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPp3pUWZTL/06V6Z4Ry/R5CRZ5lKFtB6afM5gfWK16Sisk7vEaidEXHzSx1fGgBl5TCV88fx3S7w7dAUCHU2nfDMwC/6YyQK7SkjI35P1wndWgRTefeCbkYy5UiwyGkb6S0Qtsa/igZtFRHlmAAjHj9oPHlWZ1zRHRr6TOzK5p8Vf0nOBewXMmsG467Fda6EYgJLpWzvS1SQRxw76wbpbWC5PDFNN/W9nhfkm0/C0xyXIyZMqeL2Ms2gepmAZAAhv+PHXaMGKs26uZDN5dyoYL0PsoSRXWetOO09Xt098hUJZScgN6nuRMxwWB2n1ujBAmPJp11MlnAi9rQYl5jSCQIDAQAB";
     
-    private static final String ACTION_INIT = "init";
+    private static final String ACTION_INIT = "iabInit";
+    private static final String ACTION_INV = "iabInventory";
+    private static final String ACTION_GOODS = "iabGoods";
+    private static final String ACTION_BUY = "iabBuy";
+    private static final String ACTION_TRANSACT = "iabTransact";
+    private static final String ACTION_CONSUME = "iabConsume";
 
     private IInAppBillingService mService;
 
@@ -40,17 +45,32 @@ public class GoogleInAppBilling extends CordovaPlugin{
         // Save the callback id
         // this.callbackId = callbackId;
         boolean result = true;
-        PluginResult pluginResult;
-        
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+        pluginResult.setKeepCallback(true);
+
         if (ACTION_INIT.equals(action)) {
-            init();
+            init(callbackContext);
+            callbackContext.sendPluginResult(pluginResult);
+        } else if (ACTION_INV.equals(action)){
+        } else if (ACTION_GOODS.equals(action)){
+        } else if (ACTION_BUY.equals(action)){
+        } else if (ACTION_TRANSACT.equals(action)){
+        } else if (ACTION_CONSUME.equals(action)){
         }
 
         return result;
     }
 
-    private void init(){
+    private void init(CallbackContext callbackContext){
         bindService(new Intent("com.android.vending.billing.InAppBillingService.BIND"), mServiceConn, Context.BIND_AUTO_CREATE);
+        PluginResult result;
+        if (mServiceConn != null){
+            result = new PluginResult(PluginResult.Status.OK, "In app billing initialized");
+        }else{
+            result = new PluginResult(PluginResult.Status.ERROR, "In app billing not supported");
+        }
+        result.setKeepCallback(false);
+        callbackContext.sendPluginResult(result);
     }
 
     public void deinit(){
