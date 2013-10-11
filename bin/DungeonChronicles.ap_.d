@@ -140,6 +140,7 @@
 /home/ldarren/Projects/DungeonChronicles/bin/res/drawable-mdpi/com_facebook_button_blue_focused.9.png \
 /home/ldarren/Projects/DungeonChronicles/assets/www \
 /home/ldarren/Projects/DungeonChronicles/assets/www/cordova.js \
+/home/ldarren/Projects/DungeonChronicles/assets/www/pico-plugin-goog.js \
 /home/ldarren/Projects/DungeonChronicles/assets/www/index.html \
 /home/ldarren/Projects/DungeonChronicles/assets/www/css \
 /home/ldarren/Projects/DungeonChronicles/assets/www/cdv-plugin-fb-connect.js \

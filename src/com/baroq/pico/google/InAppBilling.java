@@ -21,6 +21,7 @@ import com.baroq.pico.google.iab.IabResult;
 import com.android.vending.billing.IInAppBillingService;
 
 public class InAppBilling extends CordovaPlugin{
+    private static final String TAG = "PICO-PLUGIN-GOOG";
     private static final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPp3pUWZTL/06V6Z4Ry/R5CRZ5lKFtB6afM5gfWK16Sisk7vEaidEXHzSx1fGgBl5TCV88fx3S7w7dAUCHU2nfDMwC/6YyQK7SkjI35P1wndWgRTefeCbkYy5UiwyGkb6S0Qtsa/igZtFRHlmAAjHj9oPHlWZ1zRHRr6TOzK5p8Vf0nOBewXMmsG467Fda6EYgJLpWzvS1SQRxw76wbpbWC5PDFNN/W9nhfkm0/C0xyXIyZMqeL2Ms2gepmAZAAhv+PHXaMGKs26uZDN5dyoYL0PsoSRXWetOO09Xt098hUJZScgN6nuRMxwWB2n1ujBAmPJp11MlnAi9rQYl5jSCQIDAQAB";
     
     private static final String ACTION_INIT = "iabInit";
@@ -44,7 +45,7 @@ public class InAppBilling extends CordovaPlugin{
             init(cordova.getActivity(), publicKey, callbackContext);
             callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_INV.equals(action)){
-            getInventory(callbackContext);
+            inventory(callbackContext);
             callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_GOODS.equals(action)){
         } else if (ACTION_BUY.equals(action)){
@@ -55,7 +56,7 @@ public class InAppBilling extends CordovaPlugin{
         return result;
     }
 
-    private void init(Activity activity, String key, CallbackContext callbackContext){
+    private void init(Activity activity, String key, final CallbackContext callbackContext){
         // Create the helper, passing it our context and the public key to verify signatures with
         Log.d(TAG, "Creating IAB helper.");
         mHelper = new IabHelper(activity, key);
