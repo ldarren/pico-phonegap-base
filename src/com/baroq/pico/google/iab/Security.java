@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.example.android.trivialdrivesample.util;
+package com.baroq.pico.google.iab;
 
 import android.text.TextUtils;
 import android.util.Log;

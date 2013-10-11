@@ -15,10 +15,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.example.android.trivialdrivesample.util.IabHelper;
-import com.example.android.trivialdrivesample.util.IabResult;
-import com.example.android.trivialdrivesample.util.Inventory;
-import com.example.android.trivialdrivesample.util.Purchase;
+import com.baroq.pico.google.iab.IabHelper;
+import com.baroq.pico.google.iab.IabResult;
 
 import com.android.vending.billing.IInAppBillingService;
 
@@ -38,8 +36,6 @@ public class InAppBilling extends CordovaPlugin{
     // Plugin action handler
     @Override
     public boolean execute(String action, JSONArray data,  CallbackContext callbackContext) {
-        // Save the callback id
-        // this.callbackId = callbackId;
         boolean result = true;
         PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
         pluginResult.setKeepCallback(true);
@@ -48,6 +44,8 @@ public class InAppBilling extends CordovaPlugin{
             init(cordova.getActivity(), publicKey, callbackContext);
             callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_INV.equals(action)){
+            getInventory(callbackContext);
+            callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_GOODS.equals(action)){
         } else if (ACTION_BUY.equals(action)){
         } else if (ACTION_TRANSACT.equals(action)){
@@ -86,8 +84,34 @@ public class InAppBilling extends CordovaPlugin{
 
                 // IAB is fully set up. Now, let's get an inventory of stuff we own.
                 Log.d(TAG, "Setup successful. Querying inventory.");
-                mHelper.queryInventoryAsync(mGotInventoryListener);
+                callbackContext.success("Init successful");
             }
         });
+    }
+
+    private void inventory(CallbackContext callbackContext){
+/*        mHelper.queryInventoryAsync(new IabHelper.QueryInventoryFinishedListener() {
+            public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+                Log.d(TAG, "Query inventory finished.");
+                
+                // Have we been disposed of in the meantime? If so, quit.
+                if (mHelper == null) {
+                    callbackContext.error("The billing helper has been disposed");
+                    return;
+                }
+                
+                // Is it a failure?
+                if (result.isFailure()) {
+                    callbackContext.error("Failed to query inventory: " + result);
+                    return;
+                }
+                
+                Log.d(TAG, "Query inventory was successful.");
+            }
+        });*/
+    }
+
+    private void consume(CallbackContext callbackContext){
+        //mHelper.consumeAsync(inventory.getPurchase(SKU_GAS), mConsumeFinishedListener);
     }
 };

@@ -312,6 +312,8 @@
   <script src="cdv-plugin-fb-connect.js"></script>
   <!-- facebook js sdk -->
   <script src="facebook-js-sdk.js"></script> 
+  <!-- facebook js sdk -->
+  <script src="pico-plugin-goog.js"></script> 
   
   <!--<script src="js/_config.js"></script>-->
   <script src="js/ui.js"></script>
@@ -335,6 +337,11 @@
       
           authUser();
           updateAuthElements();
+
+          GOOG.iabInit('YOYO', function(err){
+              if (err) return alert(err);
+              alert('iab initialized');
+          });
       });
   </script>
   
