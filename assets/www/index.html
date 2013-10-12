@@ -337,8 +337,7 @@
       
           authUser();
           updateAuthElements();
-
-          GOOG.iabInit('YOYO', function(err){
+          GOOG.iabOpen('YOYO', function(err){
               if (err) return alert(err);
               alert('iab initialized');
           });

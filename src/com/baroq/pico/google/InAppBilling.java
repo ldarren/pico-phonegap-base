@@ -24,7 +24,8 @@ public class InAppBilling extends CordovaPlugin{
     private static final String TAG = "PICO-PLUGIN-GOOG";
     private static final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPp3pUWZTL/06V6Z4Ry/R5CRZ5lKFtB6afM5gfWK16Sisk7vEaidEXHzSx1fGgBl5TCV88fx3S7w7dAUCHU2nfDMwC/6YyQK7SkjI35P1wndWgRTefeCbkYy5UiwyGkb6S0Qtsa/igZtFRHlmAAjHj9oPHlWZ1zRHRr6TOzK5p8Vf0nOBewXMmsG467Fda6EYgJLpWzvS1SQRxw76wbpbWC5PDFNN/W9nhfkm0/C0xyXIyZMqeL2Ms2gepmAZAAhv+PHXaMGKs26uZDN5dyoYL0PsoSRXWetOO09Xt098hUJZScgN6nuRMxwWB2n1ujBAmPJp11MlnAi9rQYl5jSCQIDAQAB";
     
-    private static final String ACTION_INIT = "iabInit";
+    private static final String ACTION_OPEN = "iabOpen";
+    private static final String ACTION_CLOSE = "iabClose";
     private static final String ACTION_INV = "iabInventory";
     private static final String ACTION_GOODS = "iabGoods";
     private static final String ACTION_BUY = "iabBuy";
@@ -37,13 +38,18 @@ public class InAppBilling extends CordovaPlugin{
     // Plugin action handler
     @Override
     public boolean execute(String action, JSONArray data,  CallbackContext callbackContext) {
+Log.d(TAG, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA in execute");
         boolean result = true;
         PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
         pluginResult.setKeepCallback(true);
 
-        if (ACTION_INIT.equals(action)) {
-            init(cordova.getActivity(), publicKey, callbackContext);
+        if (ACTION_OPEN.equals(action)) {
+Log.d(TAG, "open action called");
+            open(cordova.getActivity(), publicKey, callbackContext);
             callbackContext.sendPluginResult(pluginResult);
+        } else if (ACTION_CLOSE.equals(action)){
+            close();
+            callbackContext.success();
         } else if (ACTION_INV.equals(action)){
             inventory(callbackContext);
             callbackContext.sendPluginResult(pluginResult);
@@ -56,7 +62,14 @@ public class InAppBilling extends CordovaPlugin{
         return result;
     }
 
-    private void init(Activity activity, String key, final CallbackContext callbackContext){
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        close();
+    }
+
+    private void open(Activity activity, String key, final CallbackContext callbackContext){
+        close();
         // Create the helper, passing it our context and the public key to verify signatures with
         Log.d(TAG, "Creating IAB helper.");
         mHelper = new IabHelper(activity, key);
@@ -88,6 +101,13 @@ public class InAppBilling extends CordovaPlugin{
                 callbackContext.success("Init successful");
             }
         });
+    }
+
+    private void close(){
+        if (null != mHelper){
+            mHelper.dispose();
+            mHelper = null;
+        }
     }
 
     private void inventory(CallbackContext callbackContext){

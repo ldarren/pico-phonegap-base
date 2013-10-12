@@ -101,9 +101,10 @@
     <feature name="InAppBrowser">
       <param name="android-package" value="org.apache.cordova.InAppBrowser"/>
     </feature>
-    <!-- Deprecated plugins element. Remove in 3.0 -->
-    <plugins>
-        <plugin name="org.apache.cordova.facebook.Connect" value="org.apache.cordova.facebook.ConnectPlugin" />
-        <plugin name="picoGoogleIAB" value="com.baroq.pico.google.InAppBilling" />
-    </plugins>
+    <feature name="InAppBilling">
+      <param name="android-package" value="com.baroq.pico.google.InAppBilling"/>
+    </feature>
+    <feature name="org.apache.cordova.facebook.Connect">
+      <param name="android-package" value="org.apache.cordova.facebook.ConnectPlugin"/>
+    </feature>
 </widget>
