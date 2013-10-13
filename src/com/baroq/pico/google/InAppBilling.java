@@ -38,13 +38,11 @@ public class InAppBilling extends CordovaPlugin{
     // Plugin action handler
     @Override
     public boolean execute(String action, JSONArray data,  CallbackContext callbackContext) {
-Log.d(TAG, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA in execute");
         boolean result = true;
         PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
         pluginResult.setKeepCallback(true);
 
         if (ACTION_OPEN.equals(action)) {
-Log.d(TAG, "open action called");
             open(cordova.getActivity(), publicKey, callbackContext);
             callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_CLOSE.equals(action)){
