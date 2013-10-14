@@ -861,6 +861,9 @@ public class IabHelper {
                         RESPONSE_INAPP_PURCHASE_DATA_LIST);
             ArrayList<String> signatureList = ownedItems.getStringArrayList(
                         RESPONSE_INAPP_SIGNATURE_LIST);
+            inv.jsonOwnedSkus = ownedItems.getString(RESPONSE_INAPP_ITEM_LIST);
+            inv.jsonPurchaseDataList = ownedItems.getString(RESPONSE_INAPP_PURCHASE_DATA_LIST);
+            inv.jsonSignatureList = ownedItems.getString(RESPONSE_INAPP_SIGNATURE_LIST);
 
             for (int i = 0; i < purchaseDataList.size(); ++i) {
                 String purchaseData = purchaseDataList.get(i);
@@ -930,6 +933,7 @@ public class IabHelper {
 
         ArrayList<String> responseList = skuDetails.getStringArrayList(
                 RESPONSE_GET_SKU_DETAILS_LIST);
+        inv.jsonSkuDetailsList = skuDetails.getString(RESPONSE_GET_SKU_DETAILS_LIST);
 
         for (String thisResponse : responseList) {
             SkuDetails d = new SkuDetails(itemType, thisResponse);

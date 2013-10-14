@@ -17,17 +17,18 @@ import android.util.Log;
 
 import com.baroq.pico.google.iab.IabHelper;
 import com.baroq.pico.google.iab.IabResult;
+import com.baroq.pico.google.iab.Inventory;
 
-import com.android.vending.billing.IInAppBillingService;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InAppBilling extends CordovaPlugin{
     private static final String TAG = "PICO-PLUGIN-GOOG";
-    private static final String publicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPp3pUWZTL/06V6Z4Ry/R5CRZ5lKFtB6afM5gfWK16Sisk7vEaidEXHzSx1fGgBl5TCV88fx3S7w7dAUCHU2nfDMwC/6YyQK7SkjI35P1wndWgRTefeCbkYy5UiwyGkb6S0Qtsa/igZtFRHlmAAjHj9oPHlWZ1zRHRr6TOzK5p8Vf0nOBewXMmsG467Fda6EYgJLpWzvS1SQRxw76wbpbWC5PDFNN/W9nhfkm0/C0xyXIyZMqeL2Ms2gepmAZAAhv+PHXaMGKs26uZDN5dyoYL0PsoSRXWetOO09Xt098hUJZScgN6nuRMxwWB2n1ujBAmPJp11MlnAi9rQYl5jSCQIDAQAB";
+    private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPp3pUWZTL/06V6Z4Ry/R5CRZ5lKFtB6afM5gfWK16Sisk7vEaidEXHzSx1fGgBl5TCV88fx3S7w7dAUCHU2nfDMwC/6YyQK7SkjI35P1wndWgRTefeCbkYy5UiwyGkb6S0Qtsa/igZtFRHlmAAjHj9oPHlWZ1zRHRr6TOzK5p8Vf0nOBewXMmsG467Fda6EYgJLpWzvS1SQRxw76wbpbWC5PDFNN/W9nhfkm0/C0xyXIyZMqeL2Ms2gepmAZAAhv+PHXaMGKs26uZDN5dyoYL0PsoSRXWetOO09Xt098hUJZScgN6nuRMxwWB2n1ujBAmPJp11MlnAi9rQYl5jSCQIDAQAB";
     
     private static final String ACTION_OPEN = "iabOpen";
     private static final String ACTION_CLOSE = "iabClose";
     private static final String ACTION_INV = "iabInventory";
-    private static final String ACTION_GOODS = "iabGoods";
     private static final String ACTION_BUY = "iabBuy";
     private static final String ACTION_TRANSACT = "iabTransact";
     private static final String ACTION_CONSUME = "iabConsume";
@@ -43,15 +44,25 @@ public class InAppBilling extends CordovaPlugin{
         pluginResult.setKeepCallback(true);
 
         if (ACTION_OPEN.equals(action)) {
-            open(cordova.getActivity(), publicKey, callbackContext);
+            open(cordova.getActivity(), PUBLIC_KEY, callbackContext);
             callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_CLOSE.equals(action)){
             close();
             callbackContext.success();
         } else if (ACTION_INV.equals(action)){
-            inventory(callbackContext);
+            List<String> moreSkus = new ArrayList<String>();
+
+            try{
+            for (int i=0, l=data.length(); i<l; i++) {
+                moreSkus.add( data.getString(i) );
+            }
+            }catch(JSONException ex){
+                callbackContext.error(ex.getMessage());
+                return result;
+            }
+
+            inventory(moreSkus, callbackContext);
             callbackContext.sendPluginResult(pluginResult);
-        } else if (ACTION_GOODS.equals(action)){
         } else if (ACTION_BUY.equals(action)){
         } else if (ACTION_TRANSACT.equals(action)){
         } else if (ACTION_CONSUME.equals(action)){
@@ -95,7 +106,7 @@ public class InAppBilling extends CordovaPlugin{
                 }
 
                 // IAB is fully set up. Now, let's get an inventory of stuff we own.
-                Log.d(TAG, "Setup successful. Querying inventory.");
+                Log.d(TAG, "Setup successful.");
                 callbackContext.success("Init successful");
             }
         });
@@ -108,8 +119,9 @@ public class InAppBilling extends CordovaPlugin{
         }
     }
 
-    private void inventory(CallbackContext callbackContext){
-/*        mHelper.queryInventoryAsync(new IabHelper.QueryInventoryFinishedListener() {
+    private void inventory(List<String> moreSkus, final CallbackContext callbackContext){
+        Log.d(TAG, "Querying inventory.");
+        mHelper.queryInventoryAsync(true, moreSkus, new IabHelper.QueryInventoryFinishedListener() {
             public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
                 Log.d(TAG, "Query inventory finished.");
                 
@@ -124,10 +136,23 @@ public class InAppBilling extends CordovaPlugin{
                     callbackContext.error("Failed to query inventory: " + result);
                     return;
                 }
+
+                JSONObject json = new JSONObject();
+                try{
+                    json.put("ownedSkus", new JSONArray(inventory.jsonOwnedSkus));
+                    json.put("purchaseDataList", new JSONArray(inventory.jsonPurchaseDataList));
+                    json.put("signatureList", new JSONArray(inventory.jsonSignatureList));
+                    json.put("skuDetailsList", new JSONArray(inventory.jsonSkuDetailsList));
+                }catch(JSONException ex){
+                    callbackContext.error("Failed to query inventory: " + ex);
+                    return;
+                }
                 
                 Log.d(TAG, "Query inventory was successful.");
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+                callbackContext.sendPluginResult(pluginResult);
             }
-        });*/
+        });
     }
 
     private void consume(CallbackContext callbackContext){

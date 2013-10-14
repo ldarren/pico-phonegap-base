@@ -326,6 +326,7 @@
 /home/ldarren/Projects/DungeonChronicles/bin/classes/com/baroq/games/R$xml.class \
 /home/ldarren/Projects/DungeonChronicles/bin/classes/com/baroq/games/R$attr.class \
 /home/ldarren/Projects/DungeonChronicles/bin/classes/com/baroq/games/R.class \
+/home/ldarren/Projects/DungeonChronicles/bin/classes/com/baroq/pico/google/InAppBilling$2.class \
 /home/ldarren/Projects/DungeonChronicles/bin/classes/com/baroq/pico/google/iab/IabHelper$OnIabSetupFinishedListener.class \
 /home/ldarren/Projects/DungeonChronicles/bin/classes/com/baroq/pico/google/iab/IabHelper$2$1.class \
 /home/ldarren/Projects/DungeonChronicles/bin/classes/com/baroq/pico/google/iab/IabHelper.class \

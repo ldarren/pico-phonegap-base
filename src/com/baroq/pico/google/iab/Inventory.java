@@ -28,6 +28,11 @@ public class Inventory {
     Map<String,SkuDetails> mSkuMap = new HashMap<String,SkuDetails>();
     Map<String,Purchase> mPurchaseMap = new HashMap<String,Purchase>();
 
+    public String jsonOwnedSkus;
+    public String jsonPurchaseDataList;
+    public String jsonSignatureList;
+    public String jsonSkuDetailsList;
+
     Inventory() { }
 
     /** Returns the listing details for an in-app product. */
