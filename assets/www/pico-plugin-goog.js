@@ -17,5 +17,23 @@ window.GOOG = {
           function(inventory){ if (cb) cb(null, inventory); },
           function(err){ if (cb) cb(err); },
           'InAppBilling', 'iabInventory', skus || []);
+  },
+  iabBuy: function(sku, payload, cb){
+      cordova.exec(
+          function(inventory){ if (cb) cb(null, inventory); },
+          function(err){ if (cb) cb(err); },
+          'InAppBilling', 'iabBuy', [sku, payload]);
+  },
+  iabSubscribe: function(sku, payload, cb){
+      cordova.exec(
+          function(inventory){ if (cb) cb(null, inventory); },
+          function(err){ if (cb) cb(err); },
+          'InAppBilling', 'iabSubscribe', [sku, payload]);
+  },
+  iabConsume: function(sku, cb){
+      cordova.exec(
+          function(inventory){ if (cb) cb(null, inventory); },
+          function(err){ if (cb) cb(err); },
+          'InAppBilling', 'iabConsume', [sku]);
   }
 };

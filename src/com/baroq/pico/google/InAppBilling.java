@@ -18,6 +18,7 @@ import android.util.Log;
 import com.baroq.pico.google.iab.IabHelper;
 import com.baroq.pico.google.iab.IabResult;
 import com.baroq.pico.google.iab.Inventory;
+import com.baroq.pico.google.iab.Purchase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +27,14 @@ public class InAppBilling extends CordovaPlugin{
     private static final String TAG = "PICO-PLUGIN-GOOG";
     private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPp3pUWZTL/06V6Z4Ry/R5CRZ5lKFtB6afM5gfWK16Sisk7vEaidEXHzSx1fGgBl5TCV88fx3S7w7dAUCHU2nfDMwC/6YyQK7SkjI35P1wndWgRTefeCbkYy5UiwyGkb6S0Qtsa/igZtFRHlmAAjHj9oPHlWZ1zRHRr6TOzK5p8Vf0nOBewXMmsG467Fda6EYgJLpWzvS1SQRxw76wbpbWC5PDFNN/W9nhfkm0/C0xyXIyZMqeL2Ms2gepmAZAAhv+PHXaMGKs26uZDN5dyoYL0PsoSRXWetOO09Xt098hUJZScgN6nuRMxwWB2n1ujBAmPJp11MlnAi9rQYl5jSCQIDAQAB";
     
+    private static final int ACT_CB_IAP = 10001;
+    private static final int ACT_CB_SUB = 10002;
+    
     private static final String ACTION_OPEN = "iabOpen";
     private static final String ACTION_CLOSE = "iabClose";
     private static final String ACTION_INV = "iabInventory";
     private static final String ACTION_BUY = "iabBuy";
-    private static final String ACTION_TRANSACT = "iabTransact";
+    private static final String ACTION_SUB = "iabSubscribe";
     private static final String ACTION_CONSUME = "iabConsume";
 
     // The helper object
@@ -53,9 +57,9 @@ public class InAppBilling extends CordovaPlugin{
             List<String> moreSkus = new ArrayList<String>();
 
             try{
-            for (int i=0, l=data.length(); i<l; i++) {
-                moreSkus.add( data.getString(i) );
-            }
+                for (int i=0, l=data.length(); i<l; i++) {
+                    moreSkus.add( data.getString(i) );
+                }
             }catch(JSONException ex){
                 callbackContext.error(ex.getMessage());
                 return result;
@@ -64,7 +68,27 @@ public class InAppBilling extends CordovaPlugin{
             inventory(moreSkus, callbackContext);
             callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_BUY.equals(action)){
-        } else if (ACTION_TRANSACT.equals(action)){
+            String sku, payload;
+            try{
+                sku = data.getString(0);
+                payload = data.getString(1);
+            }catch(JSONException ex){
+                callbackContext.error(ex.getMessage());
+                return result;
+            }
+            buy(cordova.getActivity(), sku, payload, callbackContext);
+            callbackContext.sendPluginResult(pluginResult);
+        } else if (ACTION_SUB.equals(action)){
+            String sku, payload;
+            try{
+                sku = data.getString(0);
+                payload = data.getString(1);
+            }catch(JSONException ex){
+                callbackContext.error(ex.getMessage());
+                return result;
+            }
+            subscribe(cordova.getActivity(), sku, payload, callbackContext);
+            callbackContext.sendPluginResult(pluginResult);
         } else if (ACTION_CONSUME.equals(action)){
         }
 
@@ -85,6 +109,9 @@ public class InAppBilling extends CordovaPlugin{
 
         // enable debug logging (for a production application, you should set this to false).
         mHelper.enableDebugLogging(true);
+
+        Log.d(TAG, "Setup onActivityCallback to this");
+        cordova.setActivityResultCallback(this);
 
         // Start setup. This is asynchronous and the specified listener
         // will be called once setup completes.
@@ -174,7 +201,72 @@ public class InAppBilling extends CordovaPlugin{
         });
     }
 
-    private void consume(CallbackContext callbackContext){
-        //mHelper.consumeAsync(inventory.getPurchase(SKU_GAS), mConsumeFinishedListener);
+    private void buy(Activity act, String sku, String payload, CallbackContext callbackContext){
+        Log.d(TAG, "launching purchase flow for item purchase.");
+        purchase(act, sku, payload, IabHelper.ITEM_TYPE_INAPP, ACT_CB_IAP, callbackContext);
+    }
+
+    private void subscribe(Activity act, String sku, String payload, CallbackContext callbackContext){
+        if (!mHelper.subscriptionsSupported()) {
+            callbackContext.error("Subscriptions not supported on your device yet. Sorry!");
+            return;
+        }
+
+        Log.d(TAG, "Launching purchase flow for subscription.");
+        purchase(act, sku, payload, IabHelper.ITEM_TYPE_SUBS, ACT_CB_SUB, callbackContext);
+    }
+
+    private void purchase(Activity act, String sku, String payload, String itemType, int cbId, final CallbackContext callbackContext){
+        mHelper.launchPurchaseFlow(act, sku, IabHelper.ITEM_TYPE_SUBS, ACT_CB_SUB, 
+            new IabHelper.OnIabPurchaseFinishedListener() {
+                public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+                    Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
+
+                    // if we were disposed of in the meantime, quit.
+                    if (mHelper == null) {
+                        callbackContext.error("The billing helper has been disposed");
+                        return;
+                    }
+
+                    if (result.isFailure()) {
+                        callbackContext.error("Error purchasing: " + result);
+                        return; 
+                    }
+
+                    JSONObject json = new JSONObject();
+                    try{
+                        json.put("skuDetail", new JSONObject(purchase.getOriginalJson()));
+                        json.put("itemType", purchase.getItemType());
+                        json.put("signature", purchase.getSignature());
+                    }catch(JSONException ex){
+                        callbackContext.error("Failed to contruct purchase json: " + ex);
+                        return;
+                    }
+                    
+                    Log.d(TAG, "Query purchase was successful.");
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+                    callbackContext.sendPluginResult(pluginResult);
+                }
+            }, payload);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
+
+        // Pass on the activity result to the helper for handling
+        if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+            // not handled, so handle it ourselves (here's where you'd
+            // perform any handling of activity results not related to in-app
+            // billing...
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+        else {
+            Log.d(TAG, "onActivityResult handled by "+TAG);
+        }
+    }
+
+    private void consume(String sku, final CallbackContext callbackContext){
+        //mHelper.consumeAsync(sku, mConsumeFinishedListener);
     }
 };
