@@ -326,7 +326,7 @@
   <script>
       // Initialize the Facebook SDK
       document.addEventListener('deviceready', function() {
-
+/*
           FB.init({
               appId: '515256841901768',
               nativeInterface: CDV.FB,
@@ -337,9 +337,20 @@
       
           authUser();
           updateAuthElements();
+*/
+          console.log('opening iab');
           GOOG.iabOpen('YOYO', function(err){
-              if (err) return alert(err);
-              alert('iab initialized');
+              if (err) return console.error(err);
+              console.log('iab opened, get inventory');
+              GOOG.iabInventory(['dungeon_chronicles.golds.10', 'dungeon_chronicles.golds.50'], function(err, inventory){
+                  if (err) console.error(err);
+                  console.log('inventory obtained: ');
+                  console.log(JSON.stringify(inventory));
+                  GOOG.iabClose(function(err){
+                      if (err) console.error(err);
+                      console.log('iab closed');
+                  });
+              });
           });
       });
   </script>

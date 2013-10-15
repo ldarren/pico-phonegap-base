@@ -137,14 +137,33 @@ public class InAppBilling extends CordovaPlugin{
                     return;
                 }
 
+                Log.d(TAG, "detail list size: "+inventory.jsonSkuDetailsList.size());
                 JSONObject json = new JSONObject();
+                JSONArray ownedSkus = new JSONArray();
+                JSONArray purchaseDataList = new JSONArray();
+                JSONArray signatureList = new JSONArray();
+                JSONArray skuDetailsList = new JSONArray();
+                int i, l;
+                ArrayList<String> list1, list2, list3;
                 try{
-                    json.put("ownedSkus", new JSONArray(inventory.jsonOwnedSkus));
-                    json.put("purchaseDataList", new JSONArray(inventory.jsonPurchaseDataList));
-                    json.put("signatureList", new JSONArray(inventory.jsonSignatureList));
-                    json.put("skuDetailsList", new JSONArray(inventory.jsonSkuDetailsList));
+                    list1 = inventory.jsonOwnedSkus;
+                    list2 = inventory.jsonPurchaseDataList;
+                    list3 = inventory.jsonSignatureList;
+                    for(i=0, l=list1.size(); i<l; i++){
+                        ownedSkus.put(new JSONObject(list1.get(i)));
+                        purchaseDataList.put(new JSONObject(list2.get(i)));
+                        signatureList.put(new JSONObject(list3.get(i)));
+                    }
+                    list1 = inventory.jsonSkuDetailsList;
+                    for(i=0, l=list1.size(); i<l; i++){
+                        skuDetailsList.put(new JSONObject(list1.get(i)));
+                    }
+                    json.put("ownedSkus", ownedSkus);
+                    json.put("purchaseDataList", purchaseDataList);
+                    json.put("signatureList", signatureList);
+                    json.put("skuDetailsList", skuDetailsList);
                 }catch(JSONException ex){
-                    callbackContext.error("Failed to query inventory: " + ex);
+                    callbackContext.error("Failed to contruct inventory json: " + ex);
                     return;
                 }
                 

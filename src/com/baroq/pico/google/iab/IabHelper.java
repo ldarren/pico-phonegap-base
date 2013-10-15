@@ -855,17 +855,14 @@ public class IabHelper {
                 return IABHELPER_BAD_RESPONSE;
             }
 
-            ArrayList<String> ownedSkus = ownedItems.getStringArrayList(
-                        RESPONSE_INAPP_ITEM_LIST);
-            ArrayList<String> purchaseDataList = ownedItems.getStringArrayList(
-                        RESPONSE_INAPP_PURCHASE_DATA_LIST);
-            ArrayList<String> signatureList = ownedItems.getStringArrayList(
-                        RESPONSE_INAPP_SIGNATURE_LIST);
-            inv.jsonOwnedSkus = ownedItems.getString(RESPONSE_INAPP_ITEM_LIST);
-            inv.jsonPurchaseDataList = ownedItems.getString(RESPONSE_INAPP_PURCHASE_DATA_LIST);
-            inv.jsonSignatureList = ownedItems.getString(RESPONSE_INAPP_SIGNATURE_LIST);
+            ArrayList<String> ownedSkus = ownedItems.getStringArrayList(RESPONSE_INAPP_ITEM_LIST);
+            ArrayList<String> purchaseDataList = ownedItems.getStringArrayList(RESPONSE_INAPP_PURCHASE_DATA_LIST);
+            ArrayList<String> signatureList = ownedItems.getStringArrayList(RESPONSE_INAPP_SIGNATURE_LIST);
+            inv.jsonOwnedSkus.addAll(ownedSkus);
+            inv.jsonPurchaseDataList.addAll(purchaseDataList);
+            inv.jsonSignatureList.addAll(signatureList);
 
-            for (int i = 0; i < purchaseDataList.size(); ++i) {
+            for (int i = 0, l=purchaseDataList.size(); i < l; ++i) {
                 String purchaseData = purchaseDataList.get(i);
                 String signature = signatureList.get(i);
                 String sku = ownedSkus.get(i);
@@ -931,11 +928,11 @@ public class IabHelper {
             }
         }
 
-        ArrayList<String> responseList = skuDetails.getStringArrayList(
-                RESPONSE_GET_SKU_DETAILS_LIST);
-        inv.jsonSkuDetailsList = skuDetails.getString(RESPONSE_GET_SKU_DETAILS_LIST);
+        ArrayList<String> skuDetailsList = skuDetails.getStringArrayList(RESPONSE_GET_SKU_DETAILS_LIST);
+        inv.jsonSkuDetailsList.addAll(skuDetailsList);
+        logDebug("inv.jsonSkuDetailsList size: " + inv.jsonSkuDetailsList.size());
 
-        for (String thisResponse : responseList) {
+        for (String thisResponse : inv.jsonSkuDetailsList) {
             SkuDetails d = new SkuDetails(itemType, thisResponse);
             logDebug("Got sku details: " + d);
             inv.addSkuDetails(d);
