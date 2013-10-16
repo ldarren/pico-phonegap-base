@@ -47,49 +47,37 @@ public class InAppBilling extends CordovaPlugin{
         PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
         pluginResult.setKeepCallback(true);
 
-        if (ACTION_OPEN.equals(action)) {
-            open(cordova.getActivity(), PUBLIC_KEY, callbackContext);
-            callbackContext.sendPluginResult(pluginResult);
-        } else if (ACTION_CLOSE.equals(action)){
-            close();
-            callbackContext.success();
-        } else if (ACTION_INV.equals(action)){
-            List<String> moreSkus = new ArrayList<String>();
+        try{
+            if (ACTION_OPEN.equals(action)) {
+                open(cordova.getActivity(), PUBLIC_KEY, callbackContext);
+                callbackContext.sendPluginResult(pluginResult);
+            } else if (ACTION_CLOSE.equals(action)){
+                close();
+                callbackContext.success();
+            } else if (ACTION_INV.equals(action)){
+                List<String> moreSkus = new ArrayList<String>();
 
-            try{
                 for (int i=0, l=data.length(); i<l; i++) {
                     moreSkus.add( data.getString(i) );
                 }
-            }catch(JSONException ex){
-                callbackContext.error(ex.getMessage());
-                return result;
-            }
 
-            inventory(moreSkus, callbackContext);
-            callbackContext.sendPluginResult(pluginResult);
-        } else if (ACTION_BUY.equals(action)){
-            String sku, payload;
-            try{
-                sku = data.getString(0);
-                payload = data.getString(1);
-            }catch(JSONException ex){
-                callbackContext.error(ex.getMessage());
-                return result;
+                inventory(moreSkus, callbackContext);
+                callbackContext.sendPluginResult(pluginResult);
+            } else if (ACTION_BUY.equals(action)){
+                // buy in app item, data[0]: sku, data[1]: payload
+                buy(cordova.getActivity(), data.getString(0), data.getString(1), callbackContext);
+                callbackContext.sendPluginResult(pluginResult);
+            } else if (ACTION_SUB.equals(action)){
+                // subscribe in app service, data[0]: sku, data[1]: payload
+                subscribe(cordova.getActivity(), data.getString(0), data.getString(1), callbackContext);
+                callbackContext.sendPluginResult(pluginResult);
+            } else if (ACTION_CONSUME.equals(action)){
+                consume(new Purchase(IabHelper.ITEM_TYPE_INAPP, data.getString(0), ""), callbackContext);
+                callbackContext.sendPluginResult(pluginResult);
             }
-            buy(cordova.getActivity(), sku, payload, callbackContext);
-            callbackContext.sendPluginResult(pluginResult);
-        } else if (ACTION_SUB.equals(action)){
-            String sku, payload;
-            try{
-                sku = data.getString(0);
-                payload = data.getString(1);
-            }catch(JSONException ex){
-                callbackContext.error(ex.getMessage());
-                return result;
-            }
-            subscribe(cordova.getActivity(), sku, payload, callbackContext);
-            callbackContext.sendPluginResult(pluginResult);
-        } else if (ACTION_CONSUME.equals(action)){
+        }catch(JSONException ex){
+            callbackContext.error(ex.getMessage());
+            return result;
         }
 
         return result;
@@ -272,20 +260,19 @@ public class InAppBilling extends CordovaPlugin{
             // perform any handling of activity results not related to in-app
             // billing...
             super.onActivityResult(requestCode, resultCode, data);
-        }
-        else {
+        } else {
             Log.d(TAG, "onActivityResult handled by "+TAG);
         }
     }
 
-    private void consume(List<Purchase> purchases, final CallbackContext callbackContext){
+    private void consume(Purchase purchase, final CallbackContext callbackContext){
 
         if (mHelper == null){
             callbackContext.error("Did you forget to initialize the plugin?");
             return;
         } 
 
-        mHelper.consumeAsync(purchases, new IabHelper.OnConsumeFinishedListener() {
+        mHelper.consumeAsync(purchase, new IabHelper.OnConsumeFinishedListener() {
             public void onConsumeFinished(Purchase purchase, IabResult result) {
                 Log.d(TAG, "Consumption finished. Purchase: " + purchase + ", result: " + result);
                 
@@ -297,13 +284,11 @@ public class InAppBilling extends CordovaPlugin{
                     // game world's logic
                     
                     // remove the item from the inventory
-                    myInventory.erasePurchase(purchase.getSku());
                     Log.d(TAG, "Consumption successful. .");
                     
                     callbackContext.success(purchase.getOriginalJson());
                     
-                }
-                else {
+                } else {
                     callbackContext.error("Error while consuming: " + result);
                 }
                 

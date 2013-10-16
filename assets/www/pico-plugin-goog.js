@@ -30,10 +30,10 @@ window.GOOG = {
           function(err){ if (cb) cb(err); },
           'InAppBilling', 'iabSubscribe', [sku, payload]);
   },
-  iabConsume: function(sku, cb){
+  iabConsume: function(purchaseData, cb){
       cordova.exec(
-          function(inventory){ if (cb) cb(null, inventory); },
+          function(consumeData){ if (cb) cb(null, consumeData); },
           function(err){ if (cb) cb(err); },
-          'InAppBilling', 'iabConsume', [sku]);
+          'InAppBilling', 'iabConsume', [purchaseData]);
   }
 };
