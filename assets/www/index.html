@@ -342,12 +342,12 @@
         GOOG.iabOpen('YOYO', function(err){
             if (err) return console.error(err);
             console.log('iab opened, get inventory');
-            GOOG.iabInventory(['dungeon_chronicles.golds.10', 'dungeon_chronicles.golds.50'], function(err, inventory){
+            GOOG.iabInventory(['dungeon_chronicles.golds.10', 'dungeon_chronicles.golds.30'], function(err, inventory){
                 if (err) return console.error(err);
                 console.log('inventory obtained: ');
                 console.log(JSON.stringify(inventory));
-                console.log('buy 10 golds');
-                GOOG.iabBuy('dungeon_chronicles.golds.10', 'YOYO', function(err, purchase){
+                console.log('buy 30 golds');
+                GOOG.iabBuy('dungeon_chronicles.golds.30', 'YOYO', function(err, purchase){
                     if (err) return console.error(err);
                     console.log('purchased 10 golds');
                     console.log(JSON.stringify(purchase));

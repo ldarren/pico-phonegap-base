@@ -177,9 +177,9 @@ public class InAppBilling extends CordovaPlugin{
                     list2 = inventory.jsonPurchaseDataList;
                     list3 = inventory.jsonSignatureList;
                     for(i=0, l=list1.size(); i<l; i++){
-                        ownedSkus.put(new JSONObject(list1.get(i)));
+                        ownedSkus.put(list1.get(i));
                         purchaseDataList.put(new JSONObject(list2.get(i)));
-                        signatureList.put(new JSONObject(list3.get(i)));
+                        signatureList.put(list3.get(i));
                     }
                     list1 = inventory.jsonSkuDetailsList;
                     for(i=0, l=list1.size(); i<l; i++){
@@ -217,7 +217,7 @@ public class InAppBilling extends CordovaPlugin{
     }
 
     private void purchase(Activity act, String sku, String payload, String itemType, int cbId, final CallbackContext callbackContext){
-        mHelper.launchPurchaseFlow(act, sku, IabHelper.ITEM_TYPE_SUBS, ACT_CB_SUB, 
+        mHelper.launchPurchaseFlow(act, sku, itemType, cbId, 
             new IabHelper.OnIabPurchaseFinishedListener() {
                 public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
                     Log.d(TAG, "Purchase finished: " + result + ", purchase: " + purchase);
@@ -235,7 +235,7 @@ public class InAppBilling extends CordovaPlugin{
 
                     JSONObject json = new JSONObject();
                     try{
-                        json.put("skuDetail", new JSONObject(purchase.getOriginalJson()));
+                        json.put("purchaseData", new JSONObject(purchase.getOriginalJson()));
                         json.put("itemType", purchase.getItemType());
                         json.put("signature", purchase.getSignature());
                     }catch(JSONException ex){
