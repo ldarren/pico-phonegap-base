@@ -338,15 +338,6 @@
           authUser();
           updateAuthElements();
 */
-        var consumeItem = function(list, cb){
-            if (!list || !list.length) return cb();
-            console.log('consuming '+list[0]);
-            GOOG.iabConsume(list[0], function(err, purchase){
-                if (err) console.error(err);
-                if (purchase) console.log('consumed an item:'+JSON.stringify(purchase));
-                cb();
-            });
-        };
         console.log('opening iab');
         GOOG.iabOpen('YOYO', function(err){
             if (err) return console.error(err);
@@ -355,7 +346,10 @@
                 if (err) return console.error(err);
                 console.log('inventory obtained: ');
                 console.log(JSON.stringify(inventory));
-                consumeItem(inventory.purchaseDataList, function(){
+                console.log('consuming items:'+JSON.stringify(inventory.purchaseDataList));
+                GOOG.iabConsumes(inventory.purchaseDataList, function(err, consumeList){
+                    if (err) console.error(err);
+                    if (consumeList) console.log('consumed items:'+JSON.stringify(consumeList));
                     console.log('buy 30 golds');
                     GOOG.iabBuy('dungeon_chronicles.golds.30', 'YOYO', function(err, purchase){
                         if (err) return console.error(err);
