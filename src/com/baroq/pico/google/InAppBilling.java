@@ -202,11 +202,23 @@ public class InAppBilling extends CordovaPlugin{
     }
 
     private void buy(Activity act, String sku, String payload, CallbackContext callbackContext){
+
+        if (mHelper == null){
+            callbackContext.error("Did you forget to initialize the plugin?");
+            return;
+        } 
+
         Log.d(TAG, "launching purchase flow for item purchase.");
         purchase(act, sku, payload, IabHelper.ITEM_TYPE_INAPP, ACT_CB_IAP, callbackContext);
     }
 
     private void subscribe(Activity act, String sku, String payload, CallbackContext callbackContext){
+
+        if (mHelper == null){
+            callbackContext.error("Did you forget to initialize the plugin?");
+            return;
+        } 
+
         if (!mHelper.subscriptionsSupported()) {
             callbackContext.error("Subscriptions not supported on your device yet. Sorry!");
             return;
@@ -266,7 +278,36 @@ public class InAppBilling extends CordovaPlugin{
         }
     }
 
-    private void consume(String sku, final CallbackContext callbackContext){
-        //mHelper.consumeAsync(sku, mConsumeFinishedListener);
+    private void consume(List<Purchase> purchases, final CallbackContext callbackContext){
+
+        if (mHelper == null){
+            callbackContext.error("Did you forget to initialize the plugin?");
+            return;
+        } 
+
+        mHelper.consumeAsync(purchases, new IabHelper.OnConsumeFinishedListener() {
+            public void onConsumeFinished(Purchase purchase, IabResult result) {
+                Log.d(TAG, "Consumption finished. Purchase: " + purchase + ", result: " + result);
+                
+                // We know this is the "gas" sku because it's the only one we consume,
+                // so we don't check which sku was consumed. If you have more than one
+                // sku, you probably should check...
+                if (result.isSuccess()) {
+                    // successfully consumed, so we apply the effects of the item in our
+                    // game world's logic
+                    
+                    // remove the item from the inventory
+                    myInventory.erasePurchase(purchase.getSku());
+                    Log.d(TAG, "Consumption successful. .");
+                    
+                    callbackContext.success(purchase.getOriginalJson());
+                    
+                }
+                else {
+                    callbackContext.error("Error while consuming: " + result);
+                }
+                
+            }
+        });
     }
 };
