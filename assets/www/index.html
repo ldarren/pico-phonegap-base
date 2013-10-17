@@ -339,23 +339,23 @@
           updateAuthElements();
 */
         console.log('opening iab');
-        GOOG.iabOpen('YOYO', function(err){
+        gapi.iab.open('YOYO', function(err){
             if (err) return console.error(err);
             console.log('iab opened, get inventory');
-            GOOG.iabInventory(['dungeon_chronicles.golds.10', 'dungeon_chronicles.golds.30'], function(err, inventory){
+            gapi.iab.inventory(['dungeon_chronicles.golds.10', 'dungeon_chronicles.golds.30'], function(err, inventory){
                 if (err) return console.error(err);
                 console.log('inventory obtained: ');
                 console.log(JSON.stringify(inventory));
                 console.log('consuming items:'+JSON.stringify(inventory.purchaseDataList));
-                GOOG.iabConsumes(inventory.purchaseDataList, function(err, consumeList){
+                gapi.iab.consumes(inventory.purchaseDataList, function(err, consumeList){
                     if (err) console.error(err);
                     if (consumeList) console.log('consumed items:'+JSON.stringify(consumeList));
                     console.log('buy 30 golds');
-                    GOOG.iabBuy('dungeon_chronicles.golds.30', 'YOYO', function(err, purchase){
+                    gapi.iab.buy('dungeon_chronicles.golds.30', 'YOYO', function(err, purchase){
                         if (err) return console.error(err);
                         console.log('purchased 30 golds');
                         console.log(JSON.stringify(purchase));
-                        GOOG.iabClose(function(err){
+                        gapi.iab.close(function(err){
                             if (err) return console.error(err);
                             console.log('iab closed');
                         });
