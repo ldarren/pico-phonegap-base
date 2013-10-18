@@ -2,3 +2,4 @@ gen/
 bin/
 .*.swp
 *.log
+res/values/ids.xml
