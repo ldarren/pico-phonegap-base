@@ -25,7 +25,7 @@ import java.util.List;
 
 public class InAppBilling extends CordovaPlugin{
     private static final String TAG = "PICO-PLUGIN-GOOG";
-    private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgPp3pUWZTL/06V6Z4Ry/R5CRZ5lKFtB6afM5gfWK16Sisk7vEaidEXHzSx1fGgBl5TCV88fx3S7w7dAUCHU2nfDMwC/6YyQK7SkjI35P1wndWgRTefeCbkYy5UiwyGkb6S0Qtsa/igZtFRHlmAAjHj9oPHlWZ1zRHRr6TOzK5p8Vf0nOBewXMmsG467Fda6EYgJLpWzvS1SQRxw76wbpbWC5PDFNN/W9nhfkm0/C0xyXIyZMqeL2Ms2gepmAZAAhv+PHXaMGKs26uZDN5dyoYL0PsoSRXWetOO09Xt098hUJZScgN6nuRMxwWB2n1ujBAmPJp11MlnAi9rQYl5jSCQIDAQAB";
+    private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjcEwb3v85kNAHteS6kwksgJDHuHGgH+2GXLaBN48g72L9pdptK4WKpAYYL1S0EvwnlvgP7/baVzGLBEkNoCABC/8LsF1VQzwcO4U61wJGOwn4YOYkV+UhHtLi9Sx7ymAc7ZJmJWMXIADTssL7s/Yk2maM9yDWsj1mY8eAlwbUSeWiKKNP4jQMSpN4tKNlWSdw3GEr7kJ+e/6cWOTs4K9bZM/q+TtOZ0jM/LWMS8FrszQxq5C+tT1+dyoBiuiA/HKuXuyZ3rRicThepR5tCJeZXAKfUKpeQLDFKgTAyJnRt8ZE2mVBofV/Mkjjfqbs5KPrvhEUU96j9kygOr2WR2zXwIDAQAB";
     
     private static final int ACT_CB_IAP = 10001;
     private static final int ACT_CB_SUB = 10002;
