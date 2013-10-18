@@ -25,12 +25,12 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import com.baroq.games.BuildConfig;
 import com.facebook.internal.Utility;
 import com.facebook.model.GraphObject;
 import com.facebook.internal.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.baroq.dungeonchronicles.BuildConfig;
 
 import java.lang.reflect.Field;
 import java.util.*;

@@ -32,12 +32,12 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import com.facebook.*;
-import com.baroq.games.R;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.model.GraphUser;
 import com.facebook.internal.SessionAuthorizationType;
 import com.facebook.internal.SessionTracker;
 import com.facebook.internal.Utility;
+import com.baroq.dungeonchronicles.R;
 
 import java.util.Arrays;
 import java.util.Collections;

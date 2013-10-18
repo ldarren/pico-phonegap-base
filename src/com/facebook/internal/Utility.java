@@ -27,12 +27,12 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import com.facebook.*;
-import com.baroq.games.BuildConfig;
 import com.facebook.model.GraphObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import com.baroq.dungeonchronicles.BuildConfig;
 
 import java.io.*;
 import java.net.HttpURLConnection;

@@ -1,9 +1,9 @@
-package com.baroq.games;
+package com.baroq.dungeonchronicles;
 
 import org.apache.cordova.*;
 import android.os.Bundle;
 
-public class DungeonChronicles extends DroidGap
+public class Game extends DroidGap
 {
     /** Called when the activity is first created. */
     @Override

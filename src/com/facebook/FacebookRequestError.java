@@ -16,10 +16,10 @@
 
 package com.facebook;
 
-import com.baroq.games.R;
 import com.facebook.internal.Utility;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.baroq.dungeonchronicles.R;
 
 import java.net.HttpURLConnection;
 

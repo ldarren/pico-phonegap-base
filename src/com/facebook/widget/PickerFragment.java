@@ -33,9 +33,9 @@ import android.view.ViewStub;
 import android.view.animation.AlphaAnimation;
 import android.widget.*;
 import com.facebook.*;
-import com.baroq.games.R;
 import com.facebook.model.GraphObject;
 import com.facebook.internal.SessionTracker;
+import com.baroq.dungeonchronicles.R;
 
 import java.util.*;
 

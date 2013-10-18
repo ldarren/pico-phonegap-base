@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import com.baroq.games.R;
+import com.baroq.dungeonchronicles.R;
 
 /**
  * This Activity is a necessary part of the overall Facebook login process

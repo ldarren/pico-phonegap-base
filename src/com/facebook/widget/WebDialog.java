@@ -39,11 +39,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.facebook.*;
 import com.facebook.android.*;
-import com.baroq.games.R;
 import com.facebook.internal.Logger;
 import com.facebook.internal.ServerProtocol;
 import com.facebook.internal.Utility;
 import com.facebook.internal.Validate;
+import com.baroq.dungeonchronicles.R;
 
 /**
  * This class provides a mechanism for displaying Facebook Web dialogs inside a Dialog. Helper

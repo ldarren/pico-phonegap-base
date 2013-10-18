@@ -33,11 +33,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListView;
 import com.facebook.*;
-import com.baroq.games.R;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.model.GraphPlace;
 import com.facebook.internal.Logger;
 import com.facebook.internal.Utility;
+import com.baroq.dungeonchronicles.R;
 
 import java.util.*;
 

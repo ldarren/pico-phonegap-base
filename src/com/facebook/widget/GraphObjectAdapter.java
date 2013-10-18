@@ -24,12 +24,12 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.*;
 import com.facebook.*;
-import com.baroq.games.R;
 import com.facebook.internal.ImageDownloader;
 import com.facebook.internal.ImageRequest;
 import com.facebook.internal.ImageResponse;
 import com.facebook.model.GraphObject;
 import org.json.JSONObject;
+import com.baroq.dungeonchronicles.R;
 
 import java.net.URI;
 import java.net.URISyntaxException;

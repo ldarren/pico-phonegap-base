@@ -29,8 +29,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.facebook.FacebookException;
 import com.facebook.LoggingBehavior;
-import com.baroq.games.R;
 import com.facebook.internal.*;
+import com.baroq.dungeonchronicles.R;
 
 import java.net.URISyntaxException;
 

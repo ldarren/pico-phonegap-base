@@ -23,9 +23,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import com.facebook.*;
-import com.baroq.games.R;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.model.GraphUser;
+import com.baroq.dungeonchronicles.R;
 
 import java.util.Arrays;
 import java.util.HashSet;

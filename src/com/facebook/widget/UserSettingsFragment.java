@@ -26,12 +26,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.facebook.*;
-import com.baroq.games.R;
 import com.facebook.internal.AnalyticsEvents;
 import com.facebook.internal.ImageDownloader;
 import com.facebook.internal.ImageRequest;
 import com.facebook.internal.ImageResponse;
 import com.facebook.model.GraphUser;
+import com.baroq.dungeonchronicles.R;
 
 import java.net.URI;
 import java.net.URISyntaxException;
