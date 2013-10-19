@@ -1,5 +1,5 @@
 var cordova = window.cordova || window.Cordova;
-window.gapi= {
+window.GOOG = {
     iab: {
         open: function(apiKey, cb) {
           cordova.exec(
@@ -15,19 +15,19 @@ window.gapi= {
         },
         inventory: function(skus, cb){
           cordova.exec(
-              function(inventory){ if (cb) cb(null, inventory); },
+              function(inv){ if (cb) cb(null, inv); },
               function(err){ if (cb) cb(err); },
               'InAppBilling', 'inevntory', skus || []);
         },
         buy: function(sku, payload, cb){
           cordova.exec(
-              function(inventory){ if (cb) cb(null, inventory); },
+              function(inv){ if (cb) cb(null, inv); },
               function(err){ if (cb) cb(err); },
               'InAppBilling', 'buy', [sku, payload]);
         },
         subscribe: function(sku, payload, cb){
           cordova.exec(
-              function(inventory){ if (cb) cb(null, inventory); },
+              function(inv){ if (cb) cb(null, inv); },
               function(err){ if (cb) cb(err); },
               'InAppBilling', 'subscribe', [sku, payload]);
         },
@@ -47,12 +47,31 @@ window.gapi= {
             }
         }
     },
-    gms = {
-        auth: function(cb){
-          cordova.exec(
-              function(){ if (cb) cb(null); },
-              function(err){ if (cb) cb(err); },
-              'PlayServices', 'auth', []);
+    gms: {
+        CLIENT_NONE: 0x00,
+        CLIENT_GAMES: 0x01,
+        CLIENT_PLUS: 0x02,
+        CLIENT_APPSTATE: 0x04,
+        CLIENT_ALL: this.CLIENT_GAMES | this.CLIENT_PLUS | this.CLIENT_APPSTATE,
+        setup: function(clientCode, extraScopes, listener){
+            var params = extraScopes || [];
+            params.unshift(clientCode);
+            cordova.exec(
+                function(result){ listener(null, result); },
+                function(err){ listener(err); },
+                'PlayServices', 'setup', params);
+        },
+        signin: function(){
+            cordova.exec(
+                function(){},
+                function(){},
+                'PlayServices', 'signin', []);
+        },
+        signout: function(){
+            cordova.exec(
+                function(){},
+                function(){},
+                'PlayServices', 'signout', []);
         }
     }
 };
