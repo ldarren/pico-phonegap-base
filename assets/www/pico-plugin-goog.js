@@ -5,31 +5,31 @@ window.gapi= {
           cordova.exec(
               function(){ cb(); },
               function(err){ cb(err); },
-              'InAppBilling', 'iabOpen', [apiKey]);
+              'InAppBilling', 'open', [apiKey]);
         },
         close: function(cb) {
           cordova.exec(
               function(){ if (cb) cb(); },
               function(err){ if (cb) cb(err); },
-              'InAppBilling', 'iabClose', []);
+              'InAppBilling', 'close', []);
         },
         inventory: function(skus, cb){
           cordova.exec(
               function(inventory){ if (cb) cb(null, inventory); },
               function(err){ if (cb) cb(err); },
-              'InAppBilling', 'iabInventory', skus || []);
+              'InAppBilling', 'inevntory', skus || []);
         },
         buy: function(sku, payload, cb){
           cordova.exec(
               function(inventory){ if (cb) cb(null, inventory); },
               function(err){ if (cb) cb(err); },
-              'InAppBilling', 'iabBuy', [sku, payload]);
+              'InAppBilling', 'buy', [sku, payload]);
         },
         subscribe: function(sku, payload, cb){
           cordova.exec(
               function(inventory){ if (cb) cb(null, inventory); },
               function(err){ if (cb) cb(err); },
-              'InAppBilling', 'iabSubscribe', [sku, payload]);
+              'InAppBilling', 'subscribe', [sku, payload]);
         },
         consumes: function(purchaseList, cb){
             var _c = function(inList, outList, index, cb){
@@ -37,7 +37,7 @@ window.gapi= {
                 cordova.exec(
                     function(out){ outList.push(out); _c(inList, outList, ++index, cb); },
                     function(err){ if (cb) cb(err, outList); },
-                    'InAppBilling', 'iabConsume', [inList[index]]);
+                    'InAppBilling', 'consume', [inList[index]]);
             };
 
             if (!purchaseList || !purchaseList.length){
@@ -45,6 +45,14 @@ window.gapi= {
             }else{
                 _c(purchaseList, [], 0, cb);
             }
+        }
+    },
+    gms = {
+        auth: function(cb){
+          cordova.exec(
+              function(){ if (cb) cb(null); },
+              function(err){ if (cb) cb(err); },
+              'PlayServices', 'auth', []);
         }
     }
 };

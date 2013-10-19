@@ -104,6 +104,9 @@
     <feature name="InAppBilling">
       <param name="android-package" value="com.baroq.pico.google.InAppBilling"/>
     </feature>
+    <feature name="PlayServices">
+      <param name="android-package" value="com.baroq.pico.google.PlayServices"/>
+    </feature>
     <feature name="org.apache.cordova.facebook.Connect">
       <param name="android-package" value="org.apache.cordova.facebook.ConnectPlugin"/>
     </feature>

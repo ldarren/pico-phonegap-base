@@ -24,18 +24,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InAppBilling extends CordovaPlugin{
-    private static final String TAG = "PICO-PLUGIN-GOOG";
+    private static final String TAG = "PICO-GOOG-IAP";
     private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjcEwb3v85kNAHteS6kwksgJDHuHGgH+2GXLaBN48g72L9pdptK4WKpAYYL1S0EvwnlvgP7/baVzGLBEkNoCABC/8LsF1VQzwcO4U61wJGOwn4YOYkV+UhHtLi9Sx7ymAc7ZJmJWMXIADTssL7s/Yk2maM9yDWsj1mY8eAlwbUSeWiKKNP4jQMSpN4tKNlWSdw3GEr7kJ+e/6cWOTs4K9bZM/q+TtOZ0jM/LWMS8FrszQxq5C+tT1+dyoBiuiA/HKuXuyZ3rRicThepR5tCJeZXAKfUKpeQLDFKgTAyJnRt8ZE2mVBofV/Mkjjfqbs5KPrvhEUU96j9kygOr2WR2zXwIDAQAB";
     
     private static final int ACT_CB_IAP = 10001;
     private static final int ACT_CB_SUB = 10002;
     
-    private static final String ACTION_OPEN = "iabOpen";
-    private static final String ACTION_CLOSE = "iabClose";
-    private static final String ACTION_INV = "iabInventory";
-    private static final String ACTION_BUY = "iabBuy";
-    private static final String ACTION_SUB = "iabSubscribe";
-    private static final String ACTION_CONSUME = "iabConsume";
+    private static final String ACTION_OPEN = "open";
+    private static final String ACTION_CLOSE = "close";
+    private static final String ACTION_INV = "inventory";
+    private static final String ACTION_BUY = "buy";
+    private static final String ACTION_SUB = "subscribe";
+    private static final String ACTION_CONSUME = "consume";
 
     // The helper object
     IabHelper mHelper;
@@ -43,7 +43,6 @@ public class InAppBilling extends CordovaPlugin{
     // Plugin action handler
     @Override
     public boolean execute(String action, JSONArray data,  CallbackContext callbackContext) {
-        boolean result = true;
         PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
         pluginResult.setKeepCallback(true);
 
@@ -74,13 +73,16 @@ public class InAppBilling extends CordovaPlugin{
             } else if (ACTION_CONSUME.equals(action)){
                 consume(new Purchase(IabHelper.ITEM_TYPE_INAPP, data.getString(0), ""), callbackContext);
                 callbackContext.sendPluginResult(pluginResult);
+            } else{
+                callbackContext.error("Unknown action: " + action);
+                return false;
             }
         }catch(JSONException ex){
             callbackContext.error(ex.getMessage());
-            return result;
+            return false;
         }
 
-        return result;
+        return true;
     }
 
     @Override
