@@ -40,13 +40,13 @@
       </div>
     </div>
   </div>
-  
+<!--  
   <div id="action">
     <div id="loading-icon"></div>
   
     <div id="msg"></div>
   </div>
-  
+-->  
   <!-- Page: Homepage -->
   <div id="page-root" class="page">
       <div class="show_when_connected">
@@ -309,7 +309,7 @@
     <button id=signout>Google+ signout</button>
     <p id=gmsStatus></p>
  
- <!--<div id="deviceready"></div>-->
+ <div id="deviceready"></div>
  
   <script type="text/javascript" src="cordova.js"></script>
   <!-- cordova facebook plugin -->
@@ -381,15 +381,18 @@
 
         function onSignoutClicked(e){
             GOOG.gms.signout();
+            var gmsStatus = document.querySelector('p#gmsStatus');
+            gmsStatus.innerHTML = "";
         }
 
-        GOOG.gms.setup(GOOG.gms.CLIENT_ALL, null, onConnection);
+        console.log('set gms services('+GOOG.gms.CLIENT_ALL+')');
+        GOOG.gms.setup(GOOG.gms.CLIENT_ALL, null, onConnectionListener);
 
         var
-        btnSignin = document.querySelector('button#siginin'),
+        btnSignin = document.querySelector('button#signin'),
         btnSignout = document.querySelector('button#signout');
 
-        btnSignin.addEventListener('click', onSigninClicked, false);
+        btnSignin.addEventListener('click', onSiginClicked, false);
         btnSignout.addEventListener('click', onSignoutClicked, false);
       });
 

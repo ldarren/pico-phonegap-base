@@ -52,7 +52,7 @@ window.GOOG = {
         CLIENT_GAMES: 0x01,
         CLIENT_PLUS: 0x02,
         CLIENT_APPSTATE: 0x04,
-        CLIENT_ALL: this.CLIENT_GAMES | this.CLIENT_PLUS | this.CLIENT_APPSTATE,
+        CLIENT_ALL: 0x07,
         setup: function(clientCode, extraScopes, listener){
             var params = extraScopes || [];
             params.unshift(clientCode);

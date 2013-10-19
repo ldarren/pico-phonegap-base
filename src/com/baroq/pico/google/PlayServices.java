@@ -119,6 +119,9 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
         mHelper = new GmsHelper(cordova.getActivity());
         connectionCB = callbackContext;
 
+        Log.d(TAG, "Setup onActivityCallback to this");
+        cordova.setActivityResultCallback(this);
+
         mHelper.enableDebugLog(DEBUG_ENABLED, TAG);
 
         mHelper.setup(this, serviceId, extraScopes);
