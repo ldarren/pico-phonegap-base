@@ -72,6 +72,64 @@ window.GOOG = {
                 function(){},
                 function(){},
                 'PlayServices', 'signout', []);
+        },
+        incrementAchievement: function(id, steps, cb){
+            if (cb){
+                cordova.exec(
+                    function(){ cb(); },
+                    function(err){ cb(err); },
+                    'PlayServices', 'incrementAchievementImmediate', [id, steps]);
+            }else{
+                cordova.exec(
+                    function(){},
+                    function(){},
+                    'PlayServices', 'incrementAchievement', [id, steps]);
+            }
+        },
+        loadAchievements: function(force, cb){
+            cordova.exec(
+                function(list){ cb(null, list); },
+                function(err){ cb(err); },
+                'PlayServices', 'loadAchievements:', [force]);
+        },
+        revealAchievement: function(id, cb){
+            if (cb){
+                cordova.exec(
+                    function(){ cb(); },
+                    function(err){ cb(err); },
+                    'PlayServices', 'revealAchievementImmediate', [id]);
+            }else{
+                cordova.exec(
+                    function(){},
+                    function(err){},
+                    'PlayServices', 'revealAchievement', [id]);
+            }
+        },
+        unlockAchievement: function(id, cb){
+            if (cb){
+                cordova.exec(
+                    function(){ cb(); },
+                    function(err){ cb(err); },
+                    'PlayServices', 'unlockAchievementImmediate', [id]);
+            }else{
+                cordova.exec(
+                    function(){},
+                    function(err){},
+                    'PlayServices', 'unlockAchievement', [id]);
+            }
+        },
+        submitScore: function(id, score, cb){
+            if (cb){
+                cordova.exec(
+                    function(){ cb(); },
+                    function(err){ cb(err); },
+                    'PlayServices', 'submitScoreImmediate', [id, score]);
+            }else{
+                cordova.exec(
+                    function(){},
+                    function(err){},
+                    'PlayServices', 'unlockAchievement', [id]);
+            }
         }
     }
 };
