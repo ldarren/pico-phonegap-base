@@ -47,7 +47,7 @@ window.GOOG = {
             }
         }
     },
-    gms: {
+    games: {
         CLIENT_NONE: 0x00,
         CLIENT_GAMES: 0x01,
         CLIENT_PLUS: 0x02,
@@ -86,11 +86,11 @@ window.GOOG = {
                     'PlayServices', 'incrementAchievement', [id, steps]);
             }
         },
-        loadAchievements: function(force, cb){
+        loadAchievements: function(forceReload, cb){
             cordova.exec(
                 function(list){ cb(null, list); },
                 function(err){ cb(err); },
-                'PlayServices', 'loadAchievements:', [force]);
+                'PlayServices', 'loadAchievements:', [forceReload]);
         },
         revealAchievement: function(id, cb){
             if (cb){
@@ -118,6 +118,30 @@ window.GOOG = {
                     'PlayServices', 'unlockAchievement', [id]);
             }
         },
+        loadLeaderboardMetadata: function(leaderboardId, forceReload, cb){
+            cordova.exec(
+                function(){ cb(); },
+                function(err){ cb(err); },
+                'PlayServices', 'loadLeaderboardMetadata', [leaderboardId, forceReload]);
+        },
+        loadMoreScores: function(pos, max, dir, cb){
+            cordova.exec(
+                function(){ cb(); },
+                function(err){ cb(err); },
+                'PlayServices', 'loadMoreScores', [pos, max, dir]);
+        },
+        loadPlayerCenteredScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload, cb){
+            cordova.exec(
+                function(){ cb(); },
+                function(err){ cb(err); },
+                'PlayServices', 'loadPlayerCenteredScores', [leaderboardId, span, leaderboardCollection, maxResults, forceReload]);
+        },
+        loadTopScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload, cb){
+            cordova.exec(
+                function(){ cb(); },
+                function(err){ cb(err); },
+                'PlayServices', 'loadTopScores', [leaderboardId, span, leaderboardCollection, maxResults, forceReload]);
+        },
         submitScore: function(id, score, cb){
             if (cb){
                 cordova.exec(
@@ -130,6 +154,50 @@ window.GOOG = {
                     function(err){},
                     'PlayServices', 'unlockAchievement', [id]);
             }
+        }
+    },
+    appState:{
+        getMaxNumKeys: function(cb){
+            cordova.exec(
+                function(size){ cb(null, size); },
+                function(err){ cb(err); },
+                'PlayServices', 'getMaxNumKeys', []);
+        },
+        getMaxStateSize: function(cb){
+            cordova.exec(
+                function(size){ cb(null, size); },
+                function(err){ cb(err); },
+                'PlayServices', 'getMaxStateSize', []);
+        },
+        listStates: function(cb){
+            cordova.exec(
+                function(states){ cb(null, states); },
+                function(err){ cb(err); },
+                'PlayServices', 'listStates', []);
+        },
+        loadState: function(stateKey, cb){
+            cordova.exec(
+                function(state){ cb(null, state); },
+                function(err){ cb(err); },
+                'PlayServices', 'loadState', [stateKey]);
+        },
+        loadState: function(stateKey, cb){
+            cordova.exec(
+                function(state){ cb(null, state); },
+                function(err){ cb(err); },
+                'PlayServices', 'loadState', [stateKey]);
+        },
+        resolveState: function(stateKey, resolvedData, cb){
+            cordova.exec(
+                function(state){ cb(null, state); },
+                function(err){ cb(err); },
+                'PlayServices', 'resolveState', [stateKey, resolvedData]);
+        },
+        updateState: function(stateKey, data, cb){
+            cordova.exec(
+                function(state){ cb(null, state); },
+                function(err){ cb(err); },
+                'PlayServices', 'updateState', [stateKey, data]);
         }
     }
 };
