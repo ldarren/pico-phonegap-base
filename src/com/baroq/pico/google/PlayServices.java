@@ -27,6 +27,13 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
     private static final String ACTION_SETUP = "setup";
     private static final String ACTION_SIGNIN = "signin";
     private static final String ACTION_SIGNOUT = "signout";
+    private static final String ACTION_AS_MAX_KEYS = "getMaxNumKeys";
+    private static final String ACTION_AS_MAX_SIZE = "getMaxStateSize";
+    private static final String ACTION_AS_STATE_DEL = "deleteState";
+    private static final String ACTION_AS_STATE_LIST = "listStates";
+    private static final String ACTION_AS_STATE_LOAD = "loadState";
+    private static final String ACTION_AS_STATE_RESOLVE = "resolveState";
+    private static final String ACTION_AS_STATE_UPDATE = "updateState";
 
     GmsHelper mHelper;
     CallbackContext connectionCB;
@@ -38,9 +45,16 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
         pluginResult.setKeepCallback(true);
 
         try{
+            if (!ACTION_SETUP.equals(action) && !ACTION_SIGNIN.equals(action) && null == mHelper){
+                callbackContext.error("Please setup and signin to use PlayServices plugin");
+                return false;
+            }
             if (ACTION_SETUP.equals(action)) {
                 int l = data.length();
-                if (0 == l) callbackContext.error("Expecting at least 1 parameter for action: "+action);
+                if (0 == l) {
+                    callbackContext.error("Expecting at least 1 parameter for action: "+action);
+                    return false;
+                }
                 int serviceIds = data.getInt(0);
                 String[] extraScopes = new String[l-1];
                 for(int i=1; i<l; i++){
@@ -49,11 +63,29 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
                 setup(serviceIds, extraScopes, callbackContext);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_SIGNIN.equals(action)){
-                signin();
+                mHelper.beginUserInitiatedSignIn();
                 callbackContext.success();
             }else if (ACTION_SIGNOUT.equals(action)){
                 signout();
                 callbackContext.success();
+            }else if (ACTION_AS_MAX_KEYS.equals(action)){
+                int keys = mHelper.getAppStateClient().getMaxNumKeys();
+        Log.d(TAG, "mHelper.getAppStateClient().getMaxNumKeys: "+keys);
+
+                pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxNumKeys());
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+            }else if (ACTION_AS_MAX_SIZE.equals(action)){
+                int keys = mHelper.getAppStateClient().getMaxStateSize(); 
+        Log.d(TAG, "mHelper.getAppStateClient().getMaxStateSize(): "+keys);
+                pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxStateSize());
+                pluginResult.setKeepCallback(false);
+                callbackContext.sendPluginResult(pluginResult);
+            }else if (ACTION_AS_STATE_DEL.equals(action)){
+            }else if (ACTION_AS_STATE_LIST.equals(action)){
+            }else if (ACTION_AS_STATE_LOAD.equals(action)){
+            }else if (ACTION_AS_STATE_RESOLVE.equals(action)){
+            }else if (ACTION_AS_STATE_UPDATE.equals(action)){
             }else{
                 callbackContext.error("Unknown action: " + action);
                 return false;
@@ -125,10 +157,6 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
         mHelper.enableDebugLog(DEBUG_ENABLED, TAG);
 
         mHelper.setup(this, serviceId, extraScopes);
-    }
-
-    private void signin(){
-        mHelper.beginUserInitiatedSignIn();
     }
 
     private void signout(){

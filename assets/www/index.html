@@ -373,6 +373,14 @@
         function onConnectionListener(err, result){
             var gmsStatus = document.querySelector('p#gmsStatus');
             gmsStatus.innerHTML = result.signin ? "Succeeded" : "failed: "+result.reason;
+
+            GOOG.appState.getMaxNumKeys(function(err, slotCount){
+                if (err) return console.error(err);
+                GOOG.appState.getMaxStateSize(function(err, SlotSize){
+                    if (err) return console.error(err);
+                    gmsStatus.innerHTML += '<p>'+slotCount+'</p><p>'+slotSize+'</p>';
+                });
+            });
         }
 
         function onSiginClicked(e){

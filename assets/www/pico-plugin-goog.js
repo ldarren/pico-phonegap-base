@@ -17,7 +17,7 @@ window.GOOG = {
           cordova.exec(
               function(inv){ if (cb) cb(null, inv); },
               function(err){ if (cb) cb(err); },
-              'InAppBilling', 'inevntory', skus || []);
+              'InAppBilling', 'inventory', skus || []);
         },
         buy: function(sku, payload, cb){
           cordova.exec(
@@ -47,7 +47,7 @@ window.GOOG = {
             }
         }
     },
-    games: {
+    gms: {
         CLIENT_NONE: 0x00,
         CLIENT_GAMES: 0x01,
         CLIENT_PLUS: 0x02,
@@ -72,7 +72,9 @@ window.GOOG = {
                 function(){},
                 function(){},
                 'PlayServices', 'signout', []);
-        },
+        }
+    },
+    games: {
         incrementAchievement: function(id, steps, cb){
             if (cb){
                 cordova.exec(
@@ -157,6 +159,12 @@ window.GOOG = {
         }
     },
     appState:{
+        deleteState: function(stateKey, cb){
+            cordova.exec(
+                function(state){ cb(null, state); },
+                function(err){ cb(err); },
+                'PlayServices', 'deleteState', [stateKey]);
+        },
         getMaxNumKeys: function(cb){
             cordova.exec(
                 function(size){ cb(null, size); },
@@ -181,12 +189,6 @@ window.GOOG = {
                 function(err){ cb(err); },
                 'PlayServices', 'loadState', [stateKey]);
         },
-        loadState: function(stateKey, cb){
-            cordova.exec(
-                function(state){ cb(null, state); },
-                function(err){ cb(err); },
-                'PlayServices', 'loadState', [stateKey]);
-        },
         resolveState: function(stateKey, resolvedData, cb){
             cordova.exec(
                 function(state){ cb(null, state); },
@@ -194,10 +196,17 @@ window.GOOG = {
                 'PlayServices', 'resolveState', [stateKey, resolvedData]);
         },
         updateState: function(stateKey, data, cb){
-            cordova.exec(
-                function(state){ cb(null, state); },
-                function(err){ cb(err); },
-                'PlayServices', 'updateState', [stateKey, data]);
+            if (cb){
+                cordova.exec(
+                    function(state){ cb(null, state); },
+                    function(err){ cb(err); },
+                    'PlayServices', 'updateStateImmediate', [stateKey, data]);
+            }else{
+                cordova.exec(
+                    function(){ },
+                    function(err){ console.error(err) },
+                    'PlayServices', 'updateState', [stateKey, data]);
+            }
         }
     }
 };
