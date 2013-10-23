@@ -56,6 +56,8 @@ window.GOOG = {
 
         GMS_SIGNIN: 1,
         STATE_LOADED: 2,
+        STATE_LIST_LOADED: 3,
+        STATE_DELETED: 4,
 
         setup: function(clientCode, extraScopes, listener){
             var params = extraScopes || [];
@@ -176,10 +178,10 @@ window.GOOG = {
         STATUS_WRITE_OUT_OF_DATE_VERSION: 2000,
         STATUS_WRITE_SIZE_EXCEEDED: 2001,
 
-        deleteState: function(stateKey, cb){
+        deleteState: function(stateKey){
             cordova.exec(
-                function(state){ cb(null, state); },
-                function(err){ cb(err); },
+                function(){},
+                function(err){ console.error(err); },
                 'PlayServices', 'deleteState', [stateKey]);
         },
         getMaxNumKeys: function(cb){
@@ -196,34 +198,33 @@ window.GOOG = {
         },
         listStates: function(cb){
             cordova.exec(
-                function(states){ cb(null, states); },
-                function(err){ cb(err); },
+                function(){},
+                function(err){ console.error(err); },
                 'PlayServices', 'listStates', []);
         },
-        loadState: function(stateKey, cb){
+        loadState: function(stateKey){
             cordova.exec(
-                function(state){ cb(null, state); },
+                function(){},
                 function(err){ cb(err); },
                 'PlayServices', 'loadState', [stateKey]);
         },
         resolveState: function(stateKey, resolvedData, cb){
             cordova.exec(
-                function(state){ cb(null, state); },
+                function(){},
                 function(err){ cb(err); },
                 'PlayServices', 'resolveState', [stateKey, resolvedData]);
         },
-        updateState: function(stateKey, data, cb){
-            if (cb){
-                cordova.exec(
-                    function(state){ cb(null, state); },
-                    function(err){ cb(err); },
-                    'PlayServices', 'updateStateImmediate', [stateKey, data]);
-            }else{
-                cordova.exec(
-                    function(){ },
-                    function(err){ console.error(err) },
-                    'PlayServices', 'updateState', [stateKey, data]);
-            }
+        updateState: function(stateKey, data){
+            cordova.exec(
+                function(){ },
+                function(err){ console.error(err) },
+                'PlayServices', 'updateState', [stateKey, data]);
+        },
+        updateStateImmediate: function(stateKey, data){
+            cordova.exec(
+                function(){ },
+                function(err){ console.error(''+err); },
+                'PlayServices', 'updateStateImmediate', [stateKey, data]);
         }
     }
 };
