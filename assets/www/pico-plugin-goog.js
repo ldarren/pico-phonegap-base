@@ -53,6 +53,10 @@ window.GOOG = {
         CLIENT_PLUS: 0x02,
         CLIENT_APPSTATE: 0x04,
         CLIENT_ALL: 0x07,
+
+        GMS_SIGNIN: 1,
+        STATE_LOADED: 2,
+
         setup: function(clientCode, extraScopes, listener){
             var params = extraScopes || [];
             params.unshift(clientCode);
@@ -159,6 +163,19 @@ window.GOOG = {
         }
     },
     appState:{
+        STATUS_CLIENT_RECONNECT_REQUIRED: 2,
+        STATUS_DEVELOPER_ERROR: 7,
+        STATUS_INTERNAL_ERROR: 1,
+        STATUS_NETWORK_ERROR_NO_DATA: 4,
+        STATUS_NETWORK_ERROR_OPERATION_DEFERRED: 5,
+        STATUS_NETWORK_ERROR_OPERATION_FAILED: 6,
+        STATUS_NETWORK_ERROR_STALE_DATA: 3,
+        STATUS_OK: 0,
+        STATUS_STATE_KEY_LIMIT_EXCEEDED: 2003,
+        STATUS_STATE_KEY_NOT_FOUND: 2004,
+        STATUS_WRITE_OUT_OF_DATE_VERSION: 2000,
+        STATUS_WRITE_SIZE_EXCEEDED: 2001,
+
         deleteState: function(stateKey, cb){
             cordova.exec(
                 function(state){ cb(null, state); },

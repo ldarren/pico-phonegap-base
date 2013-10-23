@@ -376,9 +376,12 @@
 
             GOOG.appState.getMaxNumKeys(function(err, slotCount){
                 if (err) return console.error(err);
-                GOOG.appState.getMaxStateSize(function(err, SlotSize){
+                GOOG.appState.getMaxStateSize(function(err, slotSize){
                     if (err) return console.error(err);
                     gmsStatus.innerHTML += '<p>'+slotCount+'</p><p>'+slotSize+'</p>';
+                    GOOG.appState.updateState(0, ''+Date.now(), function(err, data){
+                        if (err) return console.error(err);
+                    });
                 });
             });
         }

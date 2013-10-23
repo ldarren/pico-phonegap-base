@@ -15,6 +15,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.appstate.AppStateClient;
+import com.google.android.gms.appstate.OnStateLoadedListener;
 import com.baroq.pico.google.gms.GmsHelper;
 
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
     private static final String ACTION_AS_STATE_LOAD = "loadState";
     private static final String ACTION_AS_STATE_RESOLVE = "resolveState";
     private static final String ACTION_AS_STATE_UPDATE = "updateState";
+    private static final String ACTION_AS_STATE_UPDATE_CB = "updateStateImmediate";
 
     GmsHelper mHelper;
     CallbackContext connectionCB;
@@ -69,15 +72,10 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
                 signout();
                 callbackContext.success();
             }else if (ACTION_AS_MAX_KEYS.equals(action)){
-                int keys = mHelper.getAppStateClient().getMaxNumKeys();
-        Log.d(TAG, "mHelper.getAppStateClient().getMaxNumKeys: "+keys);
-
                 pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxNumKeys());
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_AS_MAX_SIZE.equals(action)){
-                int keys = mHelper.getAppStateClient().getMaxStateSize(); 
-        Log.d(TAG, "mHelper.getAppStateClient().getMaxStateSize(): "+keys);
                 pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxStateSize());
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
@@ -85,7 +83,13 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
             }else if (ACTION_AS_STATE_LIST.equals(action)){
             }else if (ACTION_AS_STATE_LOAD.equals(action)){
             }else if (ACTION_AS_STATE_RESOLVE.equals(action)){
+                getAppStateClient().resolveState(this, OUR_STATE_KEY, resolvedVersion, resolvedGame.toBytes());
             }else if (ACTION_AS_STATE_UPDATE.equals(action)){
+                int key = data.getInt(0);
+                String dataStr = data.getString(1);
+                mHelper.getAppStateClient().updateState(key, data.getBytes());
+                callbackContext.success();
+            }else if (ACTION_AS_STATE_UPDATE_CB.equals(action)){
             }else{
                 callbackContext.error("Unknown action: " + action);
                 return false;
@@ -145,6 +149,49 @@ public class PlayServices extends CordovaPlugin implements GmsHelper.GmsHelperLi
         mHelper.onActivityResult(requestCode, responseCode, data);
         
         Log.d(TAG, "onActivityResult handled by "+TAG);
+    }
+
+    @Override           
+    public void onStateLoaded(int statusCode, int stateKey, byte[] localData) {
+        switch (statusCode) {
+            case AppStateClient.STATUS_OK:
+                // Data was successfully loaded from the cloud: merge with local data.
+                break;        
+            case AppStateClient.STATUS_STATE_KEY_NOT_FOUND:
+                // key not found means there is no saved data. To us, this is the same as
+                // having empty data, so we treat this as a success.
+                mAlreadyLoadedState = true;
+                hideAlertBar();
+                break;
+            case AppStateClient.STATUS_NETWORK_ERROR_NO_DATA:
+                // can't reach cloud, and we have no local state. Warn user that
+                // they may not see their existing progress, but any new progress won't be lost.
+                showAlertBar(R.string.no_data_warning);
+                break;
+            case AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                // can't reach cloud, but we have locally cached data.
+                showAlertBar(R.string.stale_data_warning);
+                break;
+            case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                // need to reconnect AppStateClient
+                reconnectClients(BaseGameActivity.CLIENT_APPSTATE);
+                break;
+            default:
+                // error
+                showAlertBar(R.string.load_error_warning);
+                break;
+        }
+    }
+
+    @Override
+    public void onStateConflict(int stateKey, String resolvedVersion, byte[] localData, byte[] serverData) {
+        // Need to resolve conflict between the two states.
+        // We do that by taking the union of the two sets of cleared levels,
+        // which means preserving the maximum star rating of each cleared
+        // level:
+        SaveGame localGame = new SaveGame(localData);
+        SaveGame serverGame = new SaveGame(serverData);
+        SaveGame resolvedGame = localGame.unionWith(serverGame);
     }
 
     private void setup(int serviceId, String[] extraScopes, final CallbackContext callbackContext){
