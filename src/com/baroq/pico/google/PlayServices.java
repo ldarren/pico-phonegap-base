@@ -45,9 +45,16 @@ public class PlayServices   extends     CordovaPlugin
     private static final String ACTION_AS_STATE_RESOLVE = "resolveState";
     private static final String ACTION_AS_STATE_UPDATE = "updateState";
     private static final String ACTION_AS_STATE_UPDATE_NOW = "updateStateImmediate";
+    
+    private static final int GMS_SIGNIN = 1;
+    private static final int STATE_LOADED = 2;
+    private static final int STATE_LIST_LOADED = 3;
+    private static final int STATE_CONFLICTED = 4;
+    private static final int STATE_DELETED = 5;
 
     GmsHelper mHelper;
     CallbackContext connectionCB;
+    int clientTypes = GmsHelper.CLIENT_NONE;
 
     // Plugin action handler
     @Override
@@ -66,12 +73,12 @@ public class PlayServices   extends     CordovaPlugin
                     callbackContext.error("Expecting at least 1 parameter for action: "+action);
                     return false;
                 }
-                int serviceIds = data.getInt(0);
+                clientTypes = data.getInt(0);
                 String[] extraScopes = new String[l-1];
                 for(int i=1; i<l; i++){
                     extraScopes[i-1] = data.getString(i);
                 }
-                setup(serviceIds, extraScopes, callbackContext);
+                setup(clientTypes, extraScopes, callbackContext);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_SIGNIN.equals(action)){
                 mHelper.beginUserInitiatedSignIn();
@@ -136,6 +143,7 @@ public class PlayServices   extends     CordovaPlugin
     public void onSignInSucceeded(){
         JSONObject json = new JSONObject();
         try{
+            json.put("type", GMS_SIGNIN);
             json.put("signin", true);
         }catch(JSONException ex){
             Log.e(TAG, "failed to construct signin succeeded json");
@@ -152,8 +160,9 @@ public class PlayServices   extends     CordovaPlugin
     public void onSignInFailed(String reason){
         JSONObject json = new JSONObject();
         try{
+            json.put("type", GMS_SIGNIN);
             json.put("signin", false);
-            json.put("reason", reason);
+            json.put("message", reason);
         }catch(JSONException ex){
             Log.e(TAG, "failed to construct signin failed json");
             return;
@@ -171,35 +180,53 @@ public class PlayServices   extends     CordovaPlugin
 
         super.onActivityResult(requestCode, responseCode, data);
         mHelper.onActivityResult(requestCode, responseCode, data);
-        
-        Log.d(TAG, "onActivityResult handled by "+TAG);
     }
 
     @Override           
     public void onStateLoaded(int statusCode, int stateKey, byte[] localData) {
-        switch (statusCode) {
-            case AppStateClient.STATUS_OK:
-                // Data was successfully loaded from the cloud: merge with local data.
-                break;        
-            case AppStateClient.STATUS_STATE_KEY_NOT_FOUND:
-                // key not found means there is no saved data. To us, this is the same as
-                // having empty data, so we treat this as a success.
-                break;
-            case AppStateClient.STATUS_NETWORK_ERROR_NO_DATA:
-                // can't reach cloud, and we have no local state. Warn user that
-                // they may not see their existing progress, but any new progress won't be lost.
-                break;
-            case AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA:
-                // can't reach cloud, but we have locally cached data.
-                break;
-            case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
-                // need to reconnect AppStateClient
-                mHelper.reconnectClients(clientIds);
-                break;
-            default:
-                // error
-                break;
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", STATE_LOADED);
+            json.put("status", statusCode);
+            switch (statusCode) {
+                case AppStateClient.STATUS_OK:
+                    // Data was successfully loaded from the cloud: merge with local data.
+                    json.put("stateKey", stateKey);
+                    json.put("data", new JSONObject(new String(localData)));
+                    break;        
+                case AppStateClient.STATUS_STATE_KEY_NOT_FOUND:
+                    // key not found means there is no saved data. To us, this is the same as
+                    // having empty data, so we treat this as a success.
+                    break;
+                case AppStateClient.STATUS_STATE_KEY_LIMIT_EXCEEDED:
+                    // if the application already has data present in the maximum number of state keys.
+                    break;
+                case AppStateClient.STATUS_NETWORK_ERROR_NO_DATA:
+                    // can't reach cloud, and we have no local state. Warn user that
+                    // they may not see their existing progress, but any new progress won't be lost.
+                    break;
+                case AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // can't reach cloud, but we have locally cached data.
+                    break;
+                case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect AppStateClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case AppStateClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "failed to construct signin failed json");
+            return;
         }
+
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
     @Override
@@ -208,55 +235,78 @@ public class PlayServices   extends     CordovaPlugin
         // We do that by taking the union of the two sets of cleared levels,
         // which means preserving the maximum star rating of each cleared
         // level:
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", STATE_CONFLICTED);
+            json.put("stateKey", stateKey);
+            json.put("version", resolvedVersion);
+            json.put("localData", new JSONObject(new String(localData)));
+            json.put("serverData", new JSONObject(new String(serverData)));
+        }catch(JSONException ex){
+            Log.e(TAG, "failed to construct signin failed json");
+            return;
+        }
+
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
     @Override
     public void onStateListLoaded(int statusCode, AppStateBuffer buffer) {
-        switch (statusCode) {
-            case AppStateClient.STATUS_OK:
-                // Data was successfully loaded from the cloud: merge with local data.
-                break;        
-            case AppStateClient.STATUS_STATE_KEY_NOT_FOUND:
-                // key not found means there is no saved data. To us, this is the same as
-                // having empty data, so we treat this as a success.
-                break;
-            case AppStateClient.STATUS_NETWORK_ERROR_NO_DATA:
-                // can't reach cloud, and we have no local state. Warn user that
-                // they may not see their existing progress, but any new progress won't be lost.
-                break;
-            case AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA:
-                // can't reach cloud, but we have locally cached data.
-                break;
-            case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
-                // need to reconnect AppStateClient
-                mHelper.reconnectClients(clientIds);
-                break;
-            default:
-                // error
-                break;
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", STATE_LIST_LOADED);
+            json.put("status", statusCode);
+            switch (statusCode) {
+                case AppStateClient.STATUS_OK:
+                    json.put("localData", new JSONObject(new String(localData)));
+                    json.put("serverData", new JSONObject(new String(serverData)));
+                    // Data was successfully loaded from the cloud: merge with local data.
+                    break;        
+                case AppStateClient.STATUS_NETWORK_ERROR_NO_DATA:
+                    // can't reach cloud, and we have no local state. Warn user that
+                    // they may not see their existing progress, but any new progress won't be lost.
+                    break;
+                case AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // can't reach cloud, but we have locally cached data.
+                    break;
+                case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect AppStateClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case AppStateClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "failed to construct signin failed json");
+            return;
         }
+
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
     @Override
     public void onStateDeleted(int statusCode, int stateKey){
         switch (statusCode) {
             case AppStateClient.STATUS_OK:
-                // Data was successfully loaded from the cloud: merge with local data.
+                // if data was successfully deleted from the server.
                 break;        
-            case AppStateClient.STATUS_STATE_KEY_NOT_FOUND:
-                // key not found means there is no saved data. To us, this is the same as
-                // having empty data, so we treat this as a success.
+            case AppStateClient.STATUS_INTERNAL_ERROR:
+                // if an unexpected error occurred in the service 
                 break;
-            case AppStateClient.STATUS_NETWORK_ERROR_NO_DATA:
-                // can't reach cloud, and we have no local state. Warn user that
-                // they may not see their existing progress, but any new progress won't be lost.
-                break;
-            case AppStateClient.STATUS_NETWORK_ERROR_STALE_DATA:
-                // can't reach cloud, but we have locally cached data.
+            case AppStateClient.STATUS_NETWORK_ERROR_OPERATION_FAILED:
+                // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
                 break;
             case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
                 // need to reconnect AppStateClient
-                mHelper.reconnectClients(clientIds);
+                mHelper.reconnectClients(clientTypes);
                 break;
             default:
                 // error
@@ -264,7 +314,7 @@ public class PlayServices   extends     CordovaPlugin
         }
     }
 
-    private void setup(int serviceId, String[] extraScopes, final CallbackContext callbackContext){
+    private void setup(int clientTypes, String[] extraScopes, final CallbackContext callbackContext){
         mHelper = new GmsHelper(cordova.getActivity());
         connectionCB = callbackContext;
 
@@ -273,7 +323,7 @@ public class PlayServices   extends     CordovaPlugin
 
         mHelper.enableDebugLog(DEBUG_ENABLED, TAG);
 
-        mHelper.setup(this, serviceId, extraScopes);
+        mHelper.setup(this, clientTypes, extraScopes);
     }
 
     private void signout(){

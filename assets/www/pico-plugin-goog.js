@@ -57,7 +57,8 @@ window.GOOG = {
         GMS_SIGNIN: 1,
         STATE_LOADED: 2,
         STATE_LIST_LOADED: 3,
-        STATE_DELETED: 4,
+        STATE_CONFLICTED: 4,
+        STATE_DELETED: 5,
 
         setup: function(clientCode, extraScopes, listener){
             var params = extraScopes || [];
@@ -68,16 +69,10 @@ window.GOOG = {
                 'PlayServices', 'setup', params);
         },
         signin: function(){
-            cordova.exec(
-                function(){},
-                function(){},
-                'PlayServices', 'signin', []);
+            cordova.exec(function(){},function(){},'PlayServices', 'signin', []);
         },
         signout: function(){
-            cordova.exec(
-                function(){},
-                function(){},
-                'PlayServices', 'signout', []);
+            cordova.exec(function(){},function(){},'PlayServices', 'signout', []);
         }
     },
     games: {
@@ -179,10 +174,7 @@ window.GOOG = {
         STATUS_WRITE_SIZE_EXCEEDED: 2001,
 
         deleteState: function(stateKey){
-            cordova.exec(
-                function(){},
-                function(err){ console.error(err); },
-                'PlayServices', 'deleteState', [stateKey]);
+            cordova.exec(function(){},function(){},'PlayServices', 'deleteState', [stateKey]);
         },
         getMaxNumKeys: function(cb){
             cordova.exec(
@@ -191,40 +183,24 @@ window.GOOG = {
                 'PlayServices', 'getMaxNumKeys', []);
         },
         getMaxStateSize: function(cb){
-            cordova.exec(
-                function(size){ cb(null, size); },
+            cordova.exec(function(size){ cb(null, size); },
                 function(err){ cb(err); },
                 'PlayServices', 'getMaxStateSize', []);
         },
-        listStates: function(cb){
-            cordova.exec(
-                function(){},
-                function(err){ console.error(err); },
-                'PlayServices', 'listStates', []);
+        listStates: function(){
+            cordova.exec(function(){},function(){},'PlayServices', 'listStates', []);
         },
         loadState: function(stateKey){
-            cordova.exec(
-                function(){},
-                function(err){ cb(err); },
-                'PlayServices', 'loadState', [stateKey]);
+            cordova.exec(function(){},function(){},'PlayServices', 'loadState', [stateKey]);
         },
-        resolveState: function(stateKey, resolvedData, cb){
-            cordova.exec(
-                function(){},
-                function(err){ cb(err); },
-                'PlayServices', 'resolveState', [stateKey, resolvedData]);
+        resolveState: function(stateKey, resolvedData){
+            cordova.exec(function(){},function(){},'PlayServices', 'resolveState', [stateKey, resolvedData]);
         },
         updateState: function(stateKey, data){
-            cordova.exec(
-                function(){ },
-                function(err){ console.error(err) },
-                'PlayServices', 'updateState', [stateKey, data]);
+            cordova.exec(function(){},function(){},'PlayServices', 'updateState', [stateKey, data]);
         },
         updateStateImmediate: function(stateKey, data){
-            cordova.exec(
-                function(){ },
-                function(err){ console.error(''+err); },
-                'PlayServices', 'updateStateImmediate', [stateKey, data]);
+            cordova.exec(function(){},function(){},'PlayServices', 'updateStateImmediate', [stateKey, data]);
         }
     }
 };
