@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.google.android.gms.appstate.AppStateClient;
 import com.google.android.gms.appstate.AppStateBuffer;
+import com.google.android.gms.appstate.AppState;
 import com.google.android.gms.appstate.OnStateLoadedListener;
 import com.google.android.gms.appstate.OnStateListLoadedListener;
 import com.google.android.gms.appstate.OnStateDeletedListener;
@@ -55,6 +56,7 @@ public class PlayServices   extends     CordovaPlugin
     GmsHelper mHelper;
     CallbackContext connectionCB;
     int clientTypes = GmsHelper.CLIENT_NONE;
+    int appStateNumKeys = 4;
 
     // Plugin action handler
     @Override
@@ -87,7 +89,8 @@ public class PlayServices   extends     CordovaPlugin
                 signout();
                 callbackContext.success();
             }else if (ACTION_AS_MAX_KEYS.equals(action)){
-                pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxNumKeys());
+                appStateNumKeys = mHelper.getAppStateClient().getMaxNumKeys();
+                pluginResult = new PluginResult(PluginResult.Status.OK, appStateNumKeys);
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_AS_MAX_SIZE.equals(action)){
@@ -99,7 +102,7 @@ public class PlayServices   extends     CordovaPlugin
                 mHelper.getAppStateClient().deleteState(this, key);
                 callbackContext.success();
             }else if (ACTION_AS_STATE_LIST.equals(action)){
-                mHelper.getAppStateClient().listState(this);
+                mHelper.getAppStateClient().listStates(this);
                 callbackContext.success();
             }else if (ACTION_AS_STATE_LOAD.equals(action)){
                 int key = data.getInt(0);
@@ -107,9 +110,9 @@ public class PlayServices   extends     CordovaPlugin
                 callbackContext.success();
             }else if (ACTION_AS_STATE_RESOLVE.equals(action)){
                 int key = data.getInt(0);
-                String ver = data.getString(1);
+                String resolvedVersion = data.getString(1);
                 String value = data.getString(2);
-                mHelper.getAppStateClient().resolveState(this, key, var, value.getBytes());
+                mHelper.getAppStateClient().resolveState(this, key, resolvedVersion, value.getBytes());
                 callbackContext.success();
             }else if (ACTION_AS_STATE_UPDATE.equals(action)){
                 int key = data.getInt(0);
@@ -119,7 +122,7 @@ public class PlayServices   extends     CordovaPlugin
             }else if (ACTION_AS_STATE_UPDATE_NOW.equals(action)){
                 int key = data.getInt(0);
                 String value = data.getString(1);
-                mHelper.getAppStateClient().updateState(this, key, value.getBytes());
+                mHelper.getAppStateClient().updateStateImmediate(this, key, value.getBytes());
                 callbackContext.success();
             }else{
                 callbackContext.error("Unknown action: " + action);
@@ -260,8 +263,28 @@ public class PlayServices   extends     CordovaPlugin
             json.put("status", statusCode);
             switch (statusCode) {
                 case AppStateClient.STATUS_OK:
-                    json.put("localData", new JSONObject(new String(localData)));
-                    json.put("serverData", new JSONObject(new String(serverData)));
+                    JSONArray jsonStates = new JSONArray();
+                    json.put("states", jsonStates);
+                    AppState state;
+                    JSONObject jsonState;
+                    for(int i=0;i<appStateNumKeys;i++){
+                        state = buffer.get(i);
+                        jsonState = new JSONObject();
+                        if (state.hasConflict()){
+                            jsonState.put("type", STATE_CONFLICTED);
+                            jsonState.put("stateKey", state.getKey());
+                            jsonState.put("version", state.getConflictVersion());
+                            jsonState.put("localVersion", state.getLocalVersion());
+                            jsonState.put("localData", new JSONObject(new String(state.getLocalData())));
+                            jsonState.put("serverData", new JSONObject(new String(state.getConflictData())));
+                        }else{
+                            jsonState.put("type", STATE_LOADED);
+                            jsonState.put("status", statusCode);
+                            jsonState.put("stateKey", state.getKey());
+                            jsonState.put("data", new JSONObject(new String(state.getLocalData())));
+                        }
+                        jsonStates.put(jsonState);
+                    }
                     // Data was successfully loaded from the cloud: merge with local data.
                     break;        
                 case AppStateClient.STATUS_NETWORK_ERROR_NO_DATA:
@@ -294,24 +317,37 @@ public class PlayServices   extends     CordovaPlugin
 
     @Override
     public void onStateDeleted(int statusCode, int stateKey){
-        switch (statusCode) {
-            case AppStateClient.STATUS_OK:
-                // if data was successfully deleted from the server.
-                break;        
-            case AppStateClient.STATUS_INTERNAL_ERROR:
-                // if an unexpected error occurred in the service 
-                break;
-            case AppStateClient.STATUS_NETWORK_ERROR_OPERATION_FAILED:
-                // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
-                break;
-            case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
-                // need to reconnect AppStateClient
-                mHelper.reconnectClients(clientTypes);
-                break;
-            default:
-                // error
-                break;
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", STATE_CONFLICTED);
+            json.put("statusCode", statusCode);
+            json.put("stateKey", stateKey);
+            switch (statusCode) {
+                case AppStateClient.STATUS_OK:
+                    // if data was successfully deleted from the server.
+                    break;        
+                case AppStateClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case AppStateClient.STATUS_NETWORK_ERROR_OPERATION_FAILED:
+                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                    break;
+                case AppStateClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect AppStateClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "failed to construct signin failed json");
+            return;
         }
+
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
     private void setup(int clientTypes, String[] extraScopes, final CallbackContext callbackContext){
