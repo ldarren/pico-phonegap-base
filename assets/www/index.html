@@ -375,8 +375,10 @@
             });
         });
 */
+        var asResolvedKey, asResolvedVersion, asResolvedData;
 
         function onConnectionListener(err, result){
+console.log('onConnectionListener: '+JSON.stringify(result));
             var gmsStatus = document.querySelector('p#gmsStatus');
 
             switch(result.type){
@@ -388,20 +390,23 @@
                         GOOG.appState.getMaxStateSize(function(err, slotSize){
                             if (err) return console.error(err);
                             gmsStatus.innerHTML += '<p>'+slotCount+'</p><p>'+slotSize+'</p>';
-                            GOOG.appState.updateState(0, ''+Date.now(), function(err, data){
-                                if (err) return console.error(err);
-                            });
                         });
                     });
                     break;
                 case GOOG.gms.STATE_LOADED:
-                    gmsStatus.innerHTML = result.stringify(result);
+                    gmsStatus.innerHTML = 'STATE_LOADED: '+JSON.stringify(result);
                     break;
                 case GOOG.gms.STATE_LIST_LOADED:
+                    gmsStatus.innerHTML = 'STATE_LIST_LOADED: '+JSON.stringify(result);
                     break;
                 case GOOG.gms.STATE_CONFLICTED:
+                    asResolvedVersion = result.version;
+                    asResolvedData = result.serverData;
+                    asResolvedKey = result.stateKey;
+                    gmsStatus.innerHTML = 'STATE_CONFLICTED: '+JSON.stringify(result);
                     break;
                 case GOOG.gms.STATE_DELETED:
+                    gmsStatus.innerHTML = 'STATE_DELETED: '+JSON.stringify(result);
                     break;
             }
         }
@@ -417,7 +422,7 @@
         }
 
         function onASLoad(e){
-            GOOG.appState.updateState(0);
+            GOOG.appState.loadState(0);
         }
 
         function onASUpdate(e){
@@ -431,19 +436,18 @@
         }
 
         function onASList(e){
-            GOOG.appState.listState();
+            GOOG.appState.listStates();
         }
 
         function onASResolve(e){
-            GOOG.appState.resolveState(0, asResolvedVersion, asResolvedData);
+            GOOG.appState.resolveState(asResolvedKey, asResolvedVersion, asResolvedData);
         }
 
         function onASDelete(e){
-            GOOG.appState.listState(0);
+            GOOG.appState.deleteState(0);
         }
 
-        console.log('set gms services('+GOOG.gms.CLIENT_ALL+')');
-        GOOG.gms.setup(GOOG.gms.CLIENT_ALL, null, onConnectionListener);
+        GOOG.gms.setup(GOOG.gms.CLIENT_GAMES + GOOG.gms.CLIENT_APPSTATE, null, onConnectionListener);
 
         var
         btnSignin = document.querySelector('button#signin'),

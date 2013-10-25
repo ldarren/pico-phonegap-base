@@ -56,7 +56,6 @@ public class PlayServices   extends     CordovaPlugin
     GmsHelper mHelper;
     CallbackContext connectionCB;
     int clientTypes = GmsHelper.CLIENT_NONE;
-    int appStateNumKeys = 4;
 
     // Plugin action handler
     @Override
@@ -89,8 +88,7 @@ public class PlayServices   extends     CordovaPlugin
                 signout();
                 callbackContext.success();
             }else if (ACTION_AS_MAX_KEYS.equals(action)){
-                appStateNumKeys = mHelper.getAppStateClient().getMaxNumKeys();
-                pluginResult = new PluginResult(PluginResult.Status.OK, appStateNumKeys);
+                pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxNumKeys());
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_AS_MAX_SIZE.equals(action)){
@@ -117,11 +115,13 @@ public class PlayServices   extends     CordovaPlugin
             }else if (ACTION_AS_STATE_UPDATE.equals(action)){
                 int key = data.getInt(0);
                 String value= data.getString(1);
+Log.d(TAG, "mHelper.getAppStateClient().updateState(this, "+key+", "+value+");");
                 mHelper.getAppStateClient().updateState(key, value.getBytes());
                 callbackContext.success();
             }else if (ACTION_AS_STATE_UPDATE_NOW.equals(action)){
                 int key = data.getInt(0);
                 String value = data.getString(1);
+Log.d(TAG, "mHelper.getAppStateClient().updateStateImmediate(this, "+key+", "+value+");");
                 mHelper.getAppStateClient().updateStateImmediate(this, key, value.getBytes());
                 callbackContext.success();
             }else{
@@ -149,7 +149,7 @@ public class PlayServices   extends     CordovaPlugin
             json.put("type", GMS_SIGNIN);
             json.put("signin", true);
         }catch(JSONException ex){
-            Log.e(TAG, "failed to construct signin succeeded json");
+            Log.e(TAG, "signin succeeded exception: "+ex.getMessage());
             return;
         }
         Log.d(TAG, "signin succeeded");
@@ -167,7 +167,7 @@ public class PlayServices   extends     CordovaPlugin
             json.put("signin", false);
             json.put("message", reason);
         }catch(JSONException ex){
-            Log.e(TAG, "failed to construct signin failed json");
+            Log.e(TAG, "signin failed exception: "+ex.getMessage());
             return;
         }
         Log.d(TAG, "signin failed");
@@ -223,7 +223,7 @@ public class PlayServices   extends     CordovaPlugin
                     break;
             }
         }catch(JSONException ex){
-            Log.e(TAG, "failed to construct signin failed json");
+            Log.e(TAG, "STATE_LOADED ["+statusCode+"] ["+stateKey+"] exception: "+ex.getMessage());
             return;
         }
 
@@ -246,7 +246,7 @@ public class PlayServices   extends     CordovaPlugin
             json.put("localData", new JSONObject(new String(localData)));
             json.put("serverData", new JSONObject(new String(serverData)));
         }catch(JSONException ex){
-            Log.e(TAG, "failed to construct signin failed json");
+            Log.e(TAG, "STATE_CONFLICTED ["+stateKey+"] ["+resolvedVersion+"] exception: "+ex.getMessage());
             return;
         }
 
@@ -267,7 +267,7 @@ public class PlayServices   extends     CordovaPlugin
                     json.put("states", jsonStates);
                     AppState state;
                     JSONObject jsonState;
-                    for(int i=0;i<appStateNumKeys;i++){
+                    for(int i=0,l=buffer.getCount();i<l;i++){
                         state = buffer.get(i);
                         jsonState = new JSONObject();
                         if (state.hasConflict()){
@@ -306,7 +306,7 @@ public class PlayServices   extends     CordovaPlugin
                     break;
             }
         }catch(JSONException ex){
-            Log.e(TAG, "failed to construct signin failed json");
+            Log.e(TAG, "STATE_LIST_LOADED ["+statusCode+"]["+buffer.getCount()+"] exception: "+ex.getMessage());
             return;
         }
 
@@ -341,7 +341,7 @@ public class PlayServices   extends     CordovaPlugin
                     break;
             }
         }catch(JSONException ex){
-            Log.e(TAG, "failed to construct signin failed json");
+            Log.e(TAG, "STATE_DELETED ["+statusCode+"] ["+stateKey+"] exception: "+ex.getMessage());
             return;
         }
 
