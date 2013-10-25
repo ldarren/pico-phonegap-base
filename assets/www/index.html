@@ -307,6 +307,12 @@
 
     <button id=signin>Google+ signin</button>
     <button id=signout>Google+ signout</button>
+    <button id=asUpdate>AppState Update</button>
+    <button id=asUpdateNow>AppState Update Now</button>
+    <button id=asLoad>AppState Load</button>
+    <button id=asList>AppState List</button>
+    <button id=asResolve>AppState Resolve</button>
+    <button id=asDelete>AppState Delete</button>
     <p id=gmsStatus></p>
  
  <div id="deviceready"></div>
@@ -372,18 +378,32 @@
 
         function onConnectionListener(err, result){
             var gmsStatus = document.querySelector('p#gmsStatus');
-            gmsStatus.innerHTML = result.signin ? "Succeeded" : "failed: "+result.reason;
 
-            GOOG.appState.getMaxNumKeys(function(err, slotCount){
-                if (err) return console.error(err);
-                GOOG.appState.getMaxStateSize(function(err, slotSize){
-                    if (err) return console.error(err);
-                    gmsStatus.innerHTML += '<p>'+slotCount+'</p><p>'+slotSize+'</p>';
-                    GOOG.appState.updateState(0, ''+Date.now(), function(err, data){
+            switch(result.type){
+                case GOOG.gms.GMS_SIGNIN:
+                    gmsStatus.innerHTML = result.signin ? "Succeeded" : "failed: "+result.reason;
+
+                    GOOG.appState.getMaxNumKeys(function(err, slotCount){
                         if (err) return console.error(err);
+                        GOOG.appState.getMaxStateSize(function(err, slotSize){
+                            if (err) return console.error(err);
+                            gmsStatus.innerHTML += '<p>'+slotCount+'</p><p>'+slotSize+'</p>';
+                            GOOG.appState.updateState(0, ''+Date.now(), function(err, data){
+                                if (err) return console.error(err);
+                            });
+                        });
                     });
-                });
-            });
+                    break;
+                case GOOG.gms.STATE_LOADED:
+                    gmsStatus.innerHTML = result.stringify(result);
+                    break;
+                case GOOG.gms.STATE_LIST_LOADED:
+                    break;
+                case GOOG.gms.STATE_CONFLICTED:
+                    break;
+                case GOOG.gms.STATE_DELETED:
+                    break;
+            }
         }
 
         function onSiginClicked(e){
@@ -393,7 +413,33 @@
         function onSignoutClicked(e){
             GOOG.gms.signout();
             var gmsStatus = document.querySelector('p#gmsStatus');
-            gmsStatus.innerHTML = "";
+            gmsStatus.innerHTML = '';
+        }
+
+        function onASLoad(e){
+            GOOG.appState.updateState(0);
+        }
+
+        function onASUpdate(e){
+            var obj = {msg:Date.now()};
+            GOOG.appState.updateState(0, JSON.stringify(obj));
+        }
+
+        function onASUpdateNow(e){
+            var obj = {msg:Date.now()};
+            GOOG.appState.updateStateImmediate(0, JSON.stringify(obj));
+        }
+
+        function onASList(e){
+            GOOG.appState.listState();
+        }
+
+        function onASResolve(e){
+            GOOG.appState.resolveState(0, asResolvedVersion, asResolvedData);
+        }
+
+        function onASDelete(e){
+            GOOG.appState.listState(0);
         }
 
         console.log('set gms services('+GOOG.gms.CLIENT_ALL+')');
@@ -401,10 +447,22 @@
 
         var
         btnSignin = document.querySelector('button#signin'),
-        btnSignout = document.querySelector('button#signout');
+        btnSignout = document.querySelector('button#signout'),
+        btnLoad = document.querySelector('button#asLoad'),
+        btnUpdate = document.querySelector('button#asUpdate'),
+        btnUpdateNow = document.querySelector('button#asUpdateNow'),
+        btnList = document.querySelector('button#asList'),
+        btnResolve = document.querySelector('button#asResolve'),
+        btnDelete = document.querySelector('button#asDelete');
 
         btnSignin.addEventListener('click', onSiginClicked, false);
         btnSignout.addEventListener('click', onSignoutClicked, false);
+        btnLoad.addEventListener('click', onASLoad, false);
+        btnUpdate.addEventListener('click', onASUpdate, false);
+        btnUpdateNow.addEventListener('click', onASUpdateNow, false);
+        btnList.addEventListener('click', onASList, false);
+        btnResolve.addEventListener('click', onASResolve, false);
+        btnDelete.addEventListener('click', onASDelete, false);
       });
 
   </script>

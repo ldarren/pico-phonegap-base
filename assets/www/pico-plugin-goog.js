@@ -193,8 +193,8 @@ window.GOOG = {
         loadState: function(stateKey){
             cordova.exec(function(){},function(){},'PlayServices', 'loadState', [stateKey]);
         },
-        resolveState: function(stateKey, resolvedData){
-            cordova.exec(function(){},function(){},'PlayServices', 'resolveState', [stateKey, resolvedData]);
+        resolveState: function(stateKey, resolvedVersion, resolvedData){
+            cordova.exec(function(){},function(){},'PlayServices', 'resolveState', [stateKey, resolvedVersion, resolvedData]);
         },
         updateState: function(stateKey, data){
             cordova.exec(function(){},function(){},'PlayServices', 'updateState', [stateKey, data]);
