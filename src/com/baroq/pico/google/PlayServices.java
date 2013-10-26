@@ -64,7 +64,7 @@ public class PlayServices   extends     CordovaPlugin
         pluginResult.setKeepCallback(true);
 
         try{
-            if (!ACTION_SETUP.equals(action) && !ACTION_SIGNIN.equals(action) && null == mHelper){
+            if (!ACTION_SETUP.equals(action) && !ACTION_SIGNIN.equals(action) && (null == mHelper || !mHelper.isConnected())){
                 callbackContext.error("Please setup and signin to use PlayServices plugin");
                 return false;
             }

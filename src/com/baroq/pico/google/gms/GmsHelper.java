@@ -498,6 +498,20 @@ public class GmsHelper implements GooglePlayServicesClient.ConnectionCallbacks, 
         setState(STATE_DISCONNECTED);
     }
 
+    public boolean isConnected() {
+        if (!checkState(TYPE_GAMEHELPER_BUG, "isConnected", "isConnected() should only " +
+            "get called while connected.", STATE_CONNECTED)) {
+            return false;
+        }
+        
+        if ((mGamesClient != null && !mGamesClient.isConnected()) || 
+            (mPlusClient != null && !mPlusClient.isConnected()) || 
+            (mAppStateClient != null && !mAppStateClient.isConnected())) {
+            return false;
+        }
+        return true;
+    }
+
     static String activityResponseCodeToString(int respCode) {
         switch (respCode) {
             case Activity.RESULT_OK:
