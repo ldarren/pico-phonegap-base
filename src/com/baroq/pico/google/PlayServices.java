@@ -15,9 +15,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.appstate.AppState;
 import com.google.android.gms.appstate.AppStateClient;
 import com.google.android.gms.appstate.AppStateBuffer;
-import com.google.android.gms.appstate.AppState;
 import com.google.android.gms.appstate.OnStateLoadedListener;
 import com.google.android.gms.appstate.OnStateListLoadedListener;
 import com.google.android.gms.appstate.OnStateDeletedListener;
@@ -38,6 +38,7 @@ public class PlayServices   extends     CordovaPlugin
     private static final String ACTION_SETUP = "setup";
     private static final String ACTION_SIGNIN = "signin";
     private static final String ACTION_SIGNOUT = "signout";
+
     private static final String ACTION_AS_MAX_KEYS = "getMaxNumKeys";
     private static final String ACTION_AS_MAX_SIZE = "getMaxStateSize";
     private static final String ACTION_AS_STATE_DEL = "deleteState";
@@ -47,6 +48,11 @@ public class PlayServices   extends     CordovaPlugin
     private static final String ACTION_AS_STATE_UPDATE = "updateState";
     private static final String ACTION_AS_STATE_UPDATE_NOW = "updateStateImmediate";
     
+    private static final String ACTION_GMS_GET_GAME = "getGame";
+    private static final String ACTION_GMS_GET_PLAYER = "getPlayer";
+
+    private static final String ACTION_GAME_SHOW_ACHIEVEMENT = "showAchievement";
+
     private static final int GMS_SIGNIN = 1;
     private static final int STATE_LOADED = 2;
     private static final int STATE_LIST_LOADED = 3;
