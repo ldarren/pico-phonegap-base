@@ -309,6 +309,7 @@ Log.d(TAG, "mHelper.getAppStateClient().updateStateImmediate(this, "+key+", "+va
             Log.e(TAG, "STATE_LIST_LOADED ["+statusCode+"]["+buffer.getCount()+"] exception: "+ex.getMessage());
             return;
         }
+        buffer.close();
 
         PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
         pluginResult.setKeepCallback(true);
