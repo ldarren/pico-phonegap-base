@@ -59,6 +59,12 @@ window.GOOG = {
         STATE_LIST_LOADED: 3,
         STATE_CONFLICTED: 4,
         STATE_DELETED: 5,
+        STATE_ACHIEVEMENT_LOADED: 6,
+        STATE_ACHIEVEMENT_UPDATED: 7,
+        STATE_GAMES_LAODED: 8,
+        STATE_LEADERBOARD_SCORES_LOADED: 9,
+        STATE_PLAYER_LOADED: 10,
+        STATE_SCORES_SUBMITTED: 11,
 
         setup: function(clientCode, extraScopes, listener){
             var params = extraScopes || [];
@@ -76,87 +82,85 @@ window.GOOG = {
         }
     },
     games: {
-        incrementAchievement: function(id, steps, cb){
-            if (cb){
-                cordova.exec(
-                    function(){ cb(); },
-                    function(err){ cb(err); },
-                    'PlayServices', 'incrementAchievementImmediate', [id, steps]);
-            }else{
-                cordova.exec(
-                    function(){},
-                    function(){},
-                    'PlayServices', 'incrementAchievement', [id, steps]);
-            }
+        STATUS_ACHIEVEMENT_NOT_INCREMENTAL: 3002,
+        STATUS_ACHIEVEMENT_UNKNOWN: 3001,
+        STATUS_ACHIEVEMENT_UNLOCKED: 3003,
+        STATUS_ACHIEVEMENT_UNLOCK_FAILURE: 3000,
+        STATUS_CLIENT_RECONNECT_REQUIRED: 2,
+        STATUS_INTERNAL_ERROR: 1,
+        STATUS_INVALID_REAL_TIME_ROOM_ID: 7002,
+        STATUS_LICENSE_CHECK_FAILED: 7,
+        STATUS_NETWORK_ERROR_NO_DATA: 4,
+        STATUS_NETWORK_ERROR_OPERATION_DEFERRED: 5,
+        STATUS_NETWORK_ERROR_OPERATION_FAILED: 6,
+        STATUS_NETWORK_ERROR_STALE_DATA: 3,
+        STATUS_OK: 0,
+        getAchievementsIntent: function(){
+            cordova.exec(function(){},function(){},'PlayServices', 'getAchievementsIntent', []);
         },
-        loadAchievements: function(forceReload, cb){
+        getAllLeaderboardsIntent: function(){
+            cordova.exec(function(){},function(){},'PlayServices', 'getAllLeaderboardsIntent', []);
+        },
+        getLeaderboardIntent: function(id){
+            cordova.exec(function(){},function(){},'PlayServices', 'getLeaderboardIntent', [id]);
+        },
+        incrementAchievement: function(id, numSteps){
+            cordova.exec(function(){},function(){},'PlayServices', 'incrementAchievement', [id, numSteps]);
+        },
+        incrementAchievementImmediate: function(id, numSteps){
+            cordova.exec(function(){},function(){},'PlayServices', 'incrementAchievementImmediate', [id, numSteps]);
+        },
+        loadAchievements: function(forceReload){
+            cordova.exec(function(){},function(){},'PlayServices', 'loadAchievements', [forceReload]);
+        },
+        loadGame: function(){
+            cordova.exec(function(){},function(){},'PlayServices', 'loadGame', []);
+        },
+        loadMoreScores: function(maxResults, pageDirection){
+            cordova.exec(function(){},function(){},'PlayServices', 'loadMoreScores', [maxResults, pageDirection]);
+        },
+        loadPlayer: function(playerId){
+            cordova.exec(function(){},function(){},'PlayServices', 'loadPlayer', [playerId]);
+        },
+        loadPlayerCenteredScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload){
             cordova.exec(
-                function(list){ cb(null, list); },
-                function(err){ cb(err); },
-                'PlayServices', 'loadAchievements:', [forceReload]);
-        },
-        revealAchievement: function(id, cb){
-            if (cb){
-                cordova.exec(
-                    function(){ cb(); },
-                    function(err){ cb(err); },
-                    'PlayServices', 'revealAchievementImmediate', [id]);
-            }else{
-                cordova.exec(
-                    function(){},
-                    function(err){},
-                    'PlayServices', 'revealAchievement', [id]);
-            }
-        },
-        unlockAchievement: function(id, cb){
-            if (cb){
-                cordova.exec(
-                    function(){ cb(); },
-                    function(err){ cb(err); },
-                    'PlayServices', 'unlockAchievementImmediate', [id]);
-            }else{
-                cordova.exec(
-                    function(){},
-                    function(err){},
-                    'PlayServices', 'unlockAchievement', [id]);
-            }
-        },
-        loadLeaderboardMetadata: function(leaderboardId, forceReload, cb){
-            cordova.exec(
-                function(){ cb(); },
-                function(err){ cb(err); },
-                'PlayServices', 'loadLeaderboardMetadata', [leaderboardId, forceReload]);
-        },
-        loadMoreScores: function(pos, max, dir, cb){
-            cordova.exec(
-                function(){ cb(); },
-                function(err){ cb(err); },
-                'PlayServices', 'loadMoreScores', [pos, max, dir]);
-        },
-        loadPlayerCenteredScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload, cb){
-            cordova.exec(
-                function(){ cb(); },
-                function(err){ cb(err); },
+                function(){},function(err){},
                 'PlayServices', 'loadPlayerCenteredScores', [leaderboardId, span, leaderboardCollection, maxResults, forceReload]);
         },
-        loadTopScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload, cb){
+        loadTopScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload){
             cordova.exec(
-                function(){ cb(); },
-                function(err){ cb(err); },
+                function(){},function(err){},
                 'PlayServices', 'loadTopScores', [leaderboardId, span, leaderboardCollection, maxResults, forceReload]);
         },
-        submitScore: function(id, score, cb){
-            if (cb){
-                cordova.exec(
-                    function(){ cb(); },
-                    function(err){ cb(err); },
-                    'PlayServices', 'submitScoreImmediate', [id, score]);
-            }else{
-                cordova.exec(
-                    function(){},
-                    function(err){},
-                    'PlayServices', 'unlockAchievement', [id]);
-            }
+        revealAchievement: function(id){
+            cordova.exec(
+                function(){},function(err){},
+                'PlayServices', 'revealAchievement', [id]);
+        },
+        revealAchievementImmediate: function(id){
+            cordova.exec(
+                function(){},function(err){},
+                'PlayServices', 'revealAchievementImmediate', [id]);
+        },
+        submitScore: function(leaderboardId, score){
+            cordova.exec(
+                function(){},function(err){},
+                'PlayServices', 'submitScore', [leaderboardId, score]);
+        },
+        submitScoreImmediate: function(leaderboardId, score){
+            cordova.exec(
+                function(){},function(err){},
+                'PlayServices', 'submitScoreImmediate', [leaderboardId, score]);
+        },
+        unlockAchievement: function(id){
+            cordova.exec(
+                function(){},function(err){},
+                'PlayServices', 'unlockAchievement', [id]);
+        },
+        unlockAchievementImmediate: function(id){
+            cordova.exec(
+                function(){},function(err){},
+                'PlayServices', 'unlockAchievementImmediate', [id]);
         }
     },
     appState:{

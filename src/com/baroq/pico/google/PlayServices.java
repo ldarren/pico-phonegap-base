@@ -18,9 +18,23 @@ import android.util.Log;
 import com.google.android.gms.appstate.AppState;
 import com.google.android.gms.appstate.AppStateClient;
 import com.google.android.gms.appstate.AppStateBuffer;
+import com.google.android.gms.games.GameBuffer;
+import com.google.android.gms.games.achievement.AchievementBuffer;
+import com.google.android.gms.games.leaderboard.LeaderboardBuffer;
+import com.google.android.gms.games.leaderboard.LeaderboardScoreBuffer;
+import com.google.android.gms.games.PlayerBuffer;
+import com.google.android.gms.games.leaderboard.SubmitScoreResult;
+
 import com.google.android.gms.appstate.OnStateLoadedListener;
 import com.google.android.gms.appstate.OnStateListLoadedListener;
 import com.google.android.gms.appstate.OnStateDeletedListener;
+import com.google.android.gms.games.achievement.OnAchievementUpdatedListener;
+import com.google.android.gms.games.achievement.OnAchievementsLoadedListener;
+import com.google.android.gms.games.OnGamesLoadedListener;
+import com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener;
+import com.google.android.gms.games.OnPlayersLoadedListener;
+import com.google.android.gms.games.leaderboard.OnScoreSubmittedListener;
+
 import com.baroq.pico.google.gms.GmsHelper;
 
 import java.util.ArrayList;
@@ -31,7 +45,13 @@ public class PlayServices   extends     CordovaPlugin
                                         GmsHelper.GmsHelperListener,
                                         OnStateLoadedListener,
                                         OnStateListLoadedListener,
-                                        OnStateDeletedListener {
+                                        OnStateDeletedListener,
+                                        OnAchievementUpdatedListener,
+                                        OnAchievementsLoadedListener,
+                                        OnGamesLoadedListener,
+                                        OnLeaderboardScoresLoadedListener,
+                                        OnPlayersLoadedListener,
+                                        OnScoreSubmittedListener{
     private static final String TAG = "PICO-GOOG-GMS";
     private static final boolean DEBUG_ENABLED = true;    
 
@@ -48,10 +68,23 @@ public class PlayServices   extends     CordovaPlugin
     private static final String ACTION_AS_STATE_UPDATE = "updateState";
     private static final String ACTION_AS_STATE_UPDATE_NOW = "updateStateImmediate";
     
-    private static final String ACTION_GMS_GET_GAME = "getGame";
-    private static final String ACTION_GMS_GET_PLAYER = "getPlayer";
-
-    private static final String ACTION_GAME_SHOW_ACHIEVEMENT = "showAchievement";
+    private static final String ACTION_GAME_SHOW_ACHIEVEMENTS = "getAchievementsIntent";
+    private static final String ACTION_GAME_SHOW_LEADERBOARDS = "getAllLeaderboardsIntent";
+    private static final String ACTION_GAME_SHOW_LEADERBOARD = "getLeaderboardIntent";
+    private static final String ACTION_GAME_INCR_ACHIEVEMENT = "incrementAchievement";
+    private static final String ACTION_GAME_INCR_ACHIEVEMENT_NOW = "incrementAchievementImmediate";
+    private static final String ACTION_GAME_LOAD_ACHIEVEMENTS = "loadAchievements";
+    private static final String ACTION_GAME_LOAD_GAME = "loadGame";
+    private static final String ACTION_GAME_LOAD_MORE_SCORES = "loadMoreScores";
+    private static final String ACTION_GAME_LOAD_PLAYER = "loadPlayer";
+    private static final String ACTION_GAME_LOAD_PLAYER_CENTERED_SCORES = "loadPlayerCenteredScores";
+    private static final String ACTION_GAME_LOAD_TOP_SCORES = "loadTopScores";
+    private static final String ACTION_GAME_REVEAL_ACHIEVEMENT = "revealAchievement";
+    private static final String ACTION_GAME_REVEAL_ACHIEVEMENT_NOW = "revealAchievementImmediate";
+    private static final String ACTION_GAME_SUBMIT_SCORE = "submitScore";
+    private static final String ACTION_GAME_SUBMIT_SCORE_NOW = "submitScoreImmediate";
+    private static final String ACTION_GAME_UNLOCK_ACHIEVEMENT = "unlockAchievement";
+    private static final String ACTION_GAME_UNLOCK_ACHIEVEMENT_NOW = "unlockAchievementImmediate";
 
     private static final int GMS_SIGNIN = 1;
     private static final int STATE_LOADED = 2;
@@ -121,15 +154,30 @@ public class PlayServices   extends     CordovaPlugin
             }else if (ACTION_AS_STATE_UPDATE.equals(action)){
                 int key = data.getInt(0);
                 String value= data.getString(1);
-Log.d(TAG, "mHelper.getAppStateClient().updateState(this, "+key+", "+value+");");
                 mHelper.getAppStateClient().updateState(key, value.getBytes());
                 callbackContext.success();
             }else if (ACTION_AS_STATE_UPDATE_NOW.equals(action)){
                 int key = data.getInt(0);
                 String value = data.getString(1);
-Log.d(TAG, "mHelper.getAppStateClient().updateStateImmediate(this, "+key+", "+value+");");
                 mHelper.getAppStateClient().updateStateImmediate(this, key, value.getBytes());
                 callbackContext.success();
+            }else if (ACTION_GAME_SHOW_ACHIEVEMENTS.equals(action)){
+            }else if (ACTION_GAME_SHOW_LEADERBOARDS.equals(action)){
+            }else if (ACTION_GAME_SHOW_LEADERBOARD.equals(action)){
+            }else if (ACTION_GAME_INCR_ACHIEVEMENT.equals(action)){
+            }else if (ACTION_GAME_INCR_ACHIEVEMENT_NOW.equals(action)){
+            }else if (ACTION_GAME_LOAD_ACHIEVEMENTS.equals(action)){
+            }else if (ACTION_GAME_LOAD_GAME.equals(action)){
+            }else if (ACTION_GAME_LOAD_MORE_SCORES.equals(action)){
+            }else if (ACTION_GAME_LOAD_PLAYER.equals(action)){
+            }else if (ACTION_GAME_LOAD_PLAYER_CENTERED_SCORES.equals(action)){
+            }else if (ACTION_GAME_LOAD_TOP_SCORES.equals(action)){
+            }else if (ACTION_GAME_REVEAL_ACHIEVEMENT.equals(action)){
+            }else if (ACTION_GAME_REVEAL_ACHIEVEMENT_NOW.equals(action)){
+            }else if (ACTION_GAME_SUBMIT_SCORE.equals(action)){
+            }else if (ACTION_GAME_SUBMIT_SCORE_NOW.equals(action)){
+            }else if (ACTION_GAME_UNLOCK_ACHIEVEMENT.equals(action)){
+            }else if (ACTION_GAME_UNLOCK_ACHIEVEMENT_NOW.equals(action)){
             }else{
                 callbackContext.error("Unknown action: " + action);
                 return false;
@@ -355,6 +403,35 @@ Log.d(TAG, "mHelper.getAppStateClient().updateStateImmediate(this, "+key+", "+va
         PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
         pluginResult.setKeepCallback(true);
         connectionCB.sendPluginResult(pluginResult);
+    }
+
+    @Override
+    public void onAchievementUpdated(int statusCode, String achievementId){
+    }
+
+    @Override
+    public void onGamesLoaded (int statusCode, GameBuffer buffer){
+        buffer.close();
+    }
+
+    @Override
+    public void onAchievementsLoaded(int statusCode, AchievementBuffer buffer){
+        buffer.close();
+    }
+
+    @Override
+    public void onLeaderboardScoresLoaded (int statusCode, LeaderboardBuffer leaderboard, LeaderboardScoreBuffer scores){
+        leaderboard.close();
+        scores.close();
+    }
+
+    @Override
+    public void onPlayersLoaded (int statusCode, PlayerBuffer buffer){
+        buffer.close();
+    }
+
+    @Override
+    public void onScoreSubmitted (int statusCode, SubmitScoreResult result){
     }
 
     private void setup(int clientTypes, String[] extraScopes, final CallbackContext callbackContext){
