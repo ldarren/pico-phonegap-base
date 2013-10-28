@@ -59,12 +59,12 @@ window.GOOG = {
         STATE_LIST_LOADED: 3,
         STATE_CONFLICTED: 4,
         STATE_DELETED: 5,
-        STATE_ACHIEVEMENT_LOADED: 6,
-        STATE_ACHIEVEMENT_UPDATED: 7,
-        STATE_GAMES_LAODED: 8,
-        STATE_LEADERBOARD_SCORES_LOADED: 9,
-        STATE_PLAYER_LOADED: 10,
-        STATE_SCORES_SUBMITTED: 11,
+        GAMES_LOADED: 8,
+        PLAYER_LOADED: 10,
+        GAME_ACHIEVEMENT_LOADED: 6,
+        GAME_ACHIEVEMENT_UPDATED: 7,
+        GAME_LEADERBOARD_SCORES_LOADED: 9,
+        GAME_SCORES_SUBMITTED: 11,
 
         setup: function(clientCode, extraScopes, listener){
             var params = extraScopes || [];

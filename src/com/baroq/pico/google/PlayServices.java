@@ -14,15 +14,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.net.Uri;
 
 import com.google.android.gms.appstate.AppState;
 import com.google.android.gms.appstate.AppStateClient;
 import com.google.android.gms.appstate.AppStateBuffer;
 import com.google.android.gms.games.GameBuffer;
-import com.google.android.gms.games.achievement.AchievementBuffer;
-import com.google.android.gms.games.leaderboard.LeaderboardBuffer;
-import com.google.android.gms.games.leaderboard.LeaderboardScoreBuffer;
+import com.google.android.gms.games.Game;
 import com.google.android.gms.games.PlayerBuffer;
+import com.google.android.gms.games.Player;
+import com.google.android.gms.games.achievement.AchievementBuffer;
+import com.google.android.gms.games.achievement.Achievement;
+import com.google.android.gms.games.leaderboard.LeaderboardBuffer;
+import com.google.android.gms.games.leaderboard.Leaderboard;
+import com.google.android.gms.games.leaderboard.LeaderboardScoreBuffer;
+import com.google.android.gms.games.leaderboard.LeaderboardScore;
 import com.google.android.gms.games.leaderboard.SubmitScoreResult;
 
 import com.google.android.gms.appstate.OnStateLoadedListener;
@@ -95,12 +101,11 @@ public class PlayServices   extends     CordovaPlugin
     GmsHelper mHelper;
     CallbackContext connectionCB;
     int clientTypes = GmsHelper.CLIENT_NONE;
+    LeaderboardScoreBuffer scoreBuffer = null;
 
     // Plugin action handler
     @Override
     public boolean execute(String action, JSONArray data,  CallbackContext callbackContext) {
-        PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
-        pluginResult.setKeepCallback(true);
 
         try{
             if (!ACTION_SETUP.equals(action) && !ACTION_SIGNIN.equals(action) && (null == mHelper || !mHelper.isConnected())){
@@ -119,6 +124,8 @@ public class PlayServices   extends     CordovaPlugin
                     extraScopes[i-1] = data.getString(i);
                 }
                 setup(clientTypes, extraScopes, callbackContext);
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.NO_RESULT);
+                pluginResult.setKeepCallback(true);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_SIGNIN.equals(action)){
                 mHelper.beginUserInitiatedSignIn();
@@ -127,11 +134,11 @@ public class PlayServices   extends     CordovaPlugin
                 signout();
                 callbackContext.success();
             }else if (ACTION_AS_MAX_KEYS.equals(action)){
-                pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxNumKeys());
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxNumKeys());
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_AS_MAX_SIZE.equals(action)){
-                pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxStateSize());
+                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxStateSize());
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
             }else if (ACTION_AS_STATE_DEL.equals(action)){
@@ -162,22 +169,95 @@ public class PlayServices   extends     CordovaPlugin
                 mHelper.getAppStateClient().updateStateImmediate(this, key, value.getBytes());
                 callbackContext.success();
             }else if (ACTION_GAME_SHOW_ACHIEVEMENTS.equals(action)){
+                mHelper.getGamesClient().getAchievementsIntent();
+                callbackContext.success();
             }else if (ACTION_GAME_SHOW_LEADERBOARDS.equals(action)){
+                mHelper.getGamesClient().getAllLeaderboardsIntent();
+                callbackContext.success();
             }else if (ACTION_GAME_SHOW_LEADERBOARD.equals(action)){
+                String id = data.getString(0);
+                mHelper.getGamesClient().getLeaderboardIntent(id);
+                callbackContext.success();
             }else if (ACTION_GAME_INCR_ACHIEVEMENT.equals(action)){
+                String id = data.getString(0);
+                int numSteps = data.getInt(1);
+                mHelper.getGamesClient().incrementAchievement(id, numSteps);
+                callbackContext.success();
             }else if (ACTION_GAME_INCR_ACHIEVEMENT_NOW.equals(action)){
+                String id = data.getString(0);
+                int numSteps = data.getInt(1);
+                mHelper.getGamesClient().incrementAchievementImmediate(this, id, numSteps);
+                callbackContext.success();
             }else if (ACTION_GAME_LOAD_ACHIEVEMENTS.equals(action)){
+                boolean forceReload = data.getBoolean(0);
+                mHelper.getGamesClient().loadAchievements(this, forceReload);
+                callbackContext.success();
             }else if (ACTION_GAME_LOAD_GAME.equals(action)){
+                mHelper.getGamesClient().loadGame(this);
+                callbackContext.success();
             }else if (ACTION_GAME_LOAD_MORE_SCORES.equals(action)){
+                if (null == scoreBuffer){
+                    callbackContext.error("Get a leaderboard fist before calling: "+action);
+                    return false;
+                }
+                int maxResults = data.getInt(0);
+                int pageDirection = data.getInt(0);
+                mHelper.getGamesClient().loadMoreScores(this, scoreBuffer, maxResults, pageDirection);
+                callbackContext.success();
             }else if (ACTION_GAME_LOAD_PLAYER.equals(action)){
+                String playerId = data.getString(0);
+                mHelper.getGamesClient().loadPlayer(this, playerId);
+                callbackContext.success();
             }else if (ACTION_GAME_LOAD_PLAYER_CENTERED_SCORES.equals(action)){
+                String leaderboardId = data.getString(0);
+                int span = data.getInt(1);
+                int leaderboardCollection = data.getInt(2);
+                int maxResults = data.getInt(3);
+                if (data.isNull(4)){
+                    mHelper.getGamesClient().loadPlayerCenteredScores(this, leaderboardId, span, leaderboardCollection, maxResults);
+                }else{
+                    boolean forceReload = data.getBoolean(4);
+                    mHelper.getGamesClient().loadPlayerCenteredScores(this, leaderboardId, span, leaderboardCollection, maxResults, forceReload);
+                }
+                callbackContext.success();
             }else if (ACTION_GAME_LOAD_TOP_SCORES.equals(action)){
+                String leaderboardId = data.getString(0);
+                int span = data.getInt(1);
+                int leaderboardCollection = data.getInt(2);
+                int maxResults = data.getInt(3);
+                if (data.isNull(4)){
+                    mHelper.getGamesClient().loadTopScores(this, leaderboardId, span, leaderboardCollection, maxResults);
+                }else{
+                    boolean forceReload = data.getBoolean(4);
+                    mHelper.getGamesClient().loadTopScores(this, leaderboardId, span, leaderboardCollection, maxResults, forceReload);
+                }
+                callbackContext.success();
             }else if (ACTION_GAME_REVEAL_ACHIEVEMENT.equals(action)){
+                String id = data.getString(0);
+                mHelper.getGamesClient().revealAchievement(id);
+                callbackContext.success();
             }else if (ACTION_GAME_REVEAL_ACHIEVEMENT_NOW.equals(action)){
+                String id = data.getString(0);
+                mHelper.getGamesClient().revealAchievementImmediate(this, id);
+                callbackContext.success();
             }else if (ACTION_GAME_SUBMIT_SCORE.equals(action)){
+                String leaderboardId = data.getString(0);
+                int score = data.getInt(1);
+                mHelper.getGamesClient().submitScore(leaderboardId, score);
+                callbackContext.success();
             }else if (ACTION_GAME_SUBMIT_SCORE_NOW.equals(action)){
+                String leaderboardId = data.getString(0);
+                int score = data.getInt(1);
+                mHelper.getGamesClient().submitScoreImmediate(this, leaderboardId, score);
+                callbackContext.success();
             }else if (ACTION_GAME_UNLOCK_ACHIEVEMENT.equals(action)){
+                String id = data.getString(0);
+                mHelper.getGamesClient().unlockAchievement(id);
+                callbackContext.success();
             }else if (ACTION_GAME_UNLOCK_ACHIEVEMENT_NOW.equals(action)){
+                String id = data.getString(0);
+                mHelper.getGamesClient().unlockAchievementImmediate(this, id);
+                callbackContext.success();
             }else{
                 callbackContext.error("Unknown action: " + action);
                 return false;
@@ -406,32 +486,309 @@ public class PlayServices   extends     CordovaPlugin
     }
 
     @Override
-    public void onAchievementUpdated(int statusCode, String achievementId){
-    }
-
-    @Override
     public void onGamesLoaded (int statusCode, GameBuffer buffer){
-        buffer.close();
-    }
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", GAMES_LOADED);
+            json.put("statusCode", statusCode);
+            switch (statusCode) {
+                case GamesClient.STATUS_OK:
+                    // if data was successfully loaded and is up-to-date.
+                    JSONArray games = new JSONArray();
+                    JSONObject game;
+                    for(int i=0,l=buffer.getCount(); i<l; i++){
+                        Game g = buffer.get(i);
+                        game = new JSONObject();
+                        game.put("achievementTotalCount", g.getAchievementTotalCount());
+                        game.put("applicationId", g.getApplicationId());
+                        game.put("description", g.getDescription());
+                        game.put("developerName", g.getDeveloperName());
+                        game.put("displayName", g.getDisplayName());
+                        Uri uri = g.getFeaturedImageUri();
+                        if (null != uri)
+                            game.put("featuredImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        uri = g.getHiResImageUri();
+                        if (null != uri)
+                            game.put("hiResImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        uri = g.getIconImageUri();
+                        if (null != uri)
+                            game.put("iconImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        game.put("leaderboardCount", g.getLeaderboardCount());
+                        game.put("primaryCategory", g.getPrimaryCategory());
+                        game.put("secondaryCategory", g.getSecondaryCategory());
+                        games.put(game);
+                    }
+                    json.put("games", games);
+                    break;        
+                case GamesClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                    break;
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
+                    // The game is not licensed to the user. Further calls will return the same code.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "GAMES_LOADED ["+statusCode+"] exception: "+ex.getMessage());
+            return;
+        }
 
-    @Override
-    public void onAchievementsLoaded(int statusCode, AchievementBuffer buffer){
         buffer.close();
-    }
-
-    @Override
-    public void onLeaderboardScoresLoaded (int statusCode, LeaderboardBuffer leaderboard, LeaderboardScoreBuffer scores){
-        leaderboard.close();
-        scores.close();
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
     @Override
     public void onPlayersLoaded (int statusCode, PlayerBuffer buffer){
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", PLAYER_LOADED);
+            json.put("statusCode", statusCode);
+            switch (statusCode) {
+                case GamesClient.STATUS_OK:
+                    // if data was successfully loaded and is up-to-date.
+                    JSONArray players = new JSONArray();
+                    JSONObject player;
+                    for(int i=0,l=buffer.getCount(); i<l; i++){
+                        Player p = buffer.get(i);
+                        player = new JSONObject();
+                        player.put("displayName", p.getDisplayName());
+                        if (p.hasHiResImage()){
+                            Uri uri = p.getHiResImageUri();
+                            player.put("hiResImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        }
+                        if (p.hasIconImage()){
+                            Uri uri = p.getIconImageUri();
+                            player.put("iconImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        }
+                        player.put("playerId", p.getPlayerId());
+                        player.put("retrievedTimestamp", p.getRetrievedTimestamp());
+                        players.put(player);
+                    }
+                    json.put("players", players);
+                    break;        
+                case GamesClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                    break;
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
+                    // The game is not licensed to the user. Further calls will return the same code.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "PLAYER_LOADED ["+statusCode+"] exception: "+ex.getMessage());
+            return;
+        }
+
         buffer.close();
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
+    }
+
+    @Override
+    public void onAchievementsLoaded(int statusCode, AchievementBuffer buffer){
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", GAME_ACHIEVEMENT_LOADED);
+            json.put("statusCode", statusCode);
+            switch (statusCode) {
+                case GamesClient.STATUS_OK:
+                    // if data was successfully loaded and is up-to-date
+abstract String  getAchievementId()
+abstract int     getCurrentSteps()
+abstract String  getDescription()
+abstract String  getFormattedCurrentSteps()
+abstract String  getFormattedTotalSteps()
+abstract long    getLastUpdatedTimestamp()
+abstract String  getName()
+abstract Player  getPlayer()
+abstract int     getState()
+abstract int     getTotalSteps()
+abstract int     getType()
+abstract Uri     getRevealedImageUri()
+abstract Uri     getUnlockedImageUri()
+                    JSONArray players = new JSONArray();
+                    JSONObject achievement;
+                    for(int i=0,l=buffer.getCount(); i<l; i++){
+                        Achievement a = buffer.get(i);
+                        achievement = new JSONObject();
+                        player.put("displayName", p.getDisplayName());
+                        if (p.hasHiResImage()){
+                            Uri uri = p.getHiResImageUri();
+                            player.put("hiResImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        }
+                        if (p.hasIconImage()){
+                            Uri uri = p.getIconImageUri();
+                            player.put("iconImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        }
+                        player.put("playerId", p.getPlayerId());
+                        player.put("retrievedTimestamp", p.getRetrievedTimestamp());
+                        players.put(player);
+                    }
+                    json.put("players", players);
+                    break;        
+                case GamesClient.STATUS_NETWORK_ERROR_NO_DATA:
+                    // A network error occurred while attempting to retrieve fresh data, and no data was available locally.
+                    break;
+                case GamesClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                    break;
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
+                    // The game is not licensed to the user. Further calls will return the same code.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "GAME_ACHIEVEMENT_LOADED ["+statusCode+"] exception: "+ex.getMessage());
+            return;
+        }
+
+        buffer.close();
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
+    }
+
+    @Override
+    public void onAchievementUpdated(int statusCode, String achievementId){
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", GAME_ACHIEVEMENT_UPDATED);
+            json.put("statusCode", statusCode);
+            switch (statusCode) {
+                case GamesClient.STATUS_OK:
+                    // if data was successfully deleted from the server.
+                    break;        
+                case GamesClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                    break;
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
+                    // The game is not licensed to the user. Further calls will return the same code.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "GAME_ACHIEVEMENT_UPDATED ["+statusCode+"] exception: "+ex.getMessage());
+            return;
+        }
+
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
+    }
+
+    @Override
+    public void onLeaderboardScoresLoaded (int statusCode, LeaderboardBuffer leaderboard, LeaderboardScoreBuffer scores){
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", GAME_LEADERBOARD_SCORES_LOADED);
+            json.put("statusCode", statusCode);
+            switch (statusCode) {
+                case GamesClient.STATUS_OK:
+                    // if data was successfully deleted from the server.
+                    break;        
+                case GamesClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                    break;
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
+                    // The game is not licensed to the user. Further calls will return the same code.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "GAME_LEADERBOARD_SCORES_LOADED ["+statusCode+"] exception: "+ex.getMessage());
+            return;
+        }
+
+        leaderboard.close();
+        scores.close();
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
     @Override
     public void onScoreSubmitted (int statusCode, SubmitScoreResult result){
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", GAME_SCORES_SUBMITTED);
+            json.put("statusCode", statusCode);
+            switch (statusCode) {
+                case GamesClient.STATUS_OK:
+                    // if data was successfully deleted from the server.
+                    break;        
+                case GamesClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                    break;
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
+                    // The game is not licensed to the user. Further calls will return the same code.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "GAME_SCORES_SUBMITTED ["+statusCode+"] exception: "+ex.getMessage());
+            return;
+        }
+
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
     private void setup(int clientTypes, String[] extraScopes, final CallbackContext callbackContext){
