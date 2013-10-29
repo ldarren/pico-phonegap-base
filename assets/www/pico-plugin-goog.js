@@ -59,11 +59,11 @@ window.GOOG = {
         STATE_LIST_LOADED: 3,
         STATE_CONFLICTED: 4,
         STATE_DELETED: 5,
-        GAMES_LOADED: 8,
-        PLAYER_LOADED: 10,
-        GAME_ACHIEVEMENT_LOADED: 6,
-        GAME_ACHIEVEMENT_UPDATED: 7,
-        GAME_LEADERBOARD_SCORES_LOADED: 9,
+        GAMES_LOADED: 6,
+        PLAYER_LOADED: 7,
+        GAME_ACHIEVEMENT_LOADED: 8,
+        GAME_ACHIEVEMENT_UPDATED: 9,
+        GAME_LEADERBOARD_SCORES_LOADED: 10,
         GAME_SCORES_SUBMITTED: 11,
 
         setup: function(clientCode, extraScopes, listener){

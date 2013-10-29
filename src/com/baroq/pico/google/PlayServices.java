@@ -21,6 +21,7 @@ import android.net.Uri;
 import com.google.android.gms.appstate.AppState;
 import com.google.android.gms.appstate.AppStateClient;
 import com.google.android.gms.appstate.AppStateBuffer;
+import com.google.android.gms.games.GamesClient;
 import com.google.android.gms.games.GameBuffer;
 import com.google.android.gms.games.Game;
 import com.google.android.gms.games.PlayerBuffer;
@@ -101,6 +102,12 @@ public class PlayServices   extends     CordovaPlugin
     private static final int STATE_LIST_LOADED = 3;
     private static final int STATE_CONFLICTED = 4;
     private static final int STATE_DELETED = 5;
+    private static final int GAMES_LOADED = 6;
+    private static final int PLAYER_LOADED = 7;
+    private static final int GAME_ACHIEVEMENT_LOADED = 8;
+    private static final int GAME_ACHIEVEMENT_UPDATED = 9;
+    private static final int GAME_LEADERBOARD_SCORES_LOADED = 10;
+    private static final int GAME_SCORES_SUBMITTED = 11;
 
     GmsHelper mHelper;
     CallbackContext connectionCB;
@@ -746,7 +753,7 @@ public class PlayServices   extends     CordovaPlugin
                         vList = new JSONArray();
                         for(j=0,k=variants.size();j<k;j++){
                             v = new JSONObject();
-                            variant = variant.get(i);
+                            variant = variants.get(i);
                             v.put("collection", variant.getCollection());
                             v.put("numScores", variant.getNumScores());
                             v.put("timeSpan", variant.getTimeSpan());
@@ -763,84 +770,85 @@ public class PlayServices   extends     CordovaPlugin
                         list.put(obj);
                     }
                     json.put("leaderboard", list);
-                    for(i=0,l=scores.getcount();i<l;i++){
+                    LeaderboardScore lbs;
+                    for(i=0,l=scores.getCount();i<l;i++){
                         obj = new JSONObject();
-                        lb = scores.get(i);
-                        obj.put("displayRank", lb.getDisplayRank());
-                        obj.put("displayScore", lb.getDisplayScore());
-                        obj.put("rank", lb.getRank());
-                        obj.put("rawScore", lb.getRawScore());
-                        obj.put("scoreHolderPlayerId", lb.getScoreHolder().getPlayerId());
-                        obj.put("scoreHolderDisplayName", lb.getScoreHolderDisplayName());
-                        Uri uri = lb.getScoreHolderHiResImageUri();
+                        lbs = scores.get(i);
+                        obj.put("displayRank", lbs.getDisplayRank());
+                        obj.put("displayScore", lbs.getDisplayScore());
+                        obj.put("rank", lbs.getRank());
+                        obj.put("rawScore", lbs.getRawScore());
+                        obj.put("scoreHolderPlayerId", lbs.getScoreHolder().getPlayerId());
+                        obj.put("scoreHolderDisplayName", lbs.getScoreHolderDisplayName());
+                        Uri uri = lbs.getScoreHolderHiResImageUri();
                         if (null != uri)
                             obj.put("scoreHolderHiResImageUri", uri.getScheme() + ':' + uri.getSchemeSpecificPart());
-                        uri = lb.getScoreHolderIconImageUri();
+                        uri = lbs.getScoreHolderIconImageUri();
                         if (null != uri)
                             obj.put("scoreHolderIconImageUri", uri.getScheme() + ':' + uri.getSchemeSpecificPart());
-                        obj.put("timestampMillis", lb.getTimestampMillis());
+                        obj.put("timestampMillis", lbs.getTimestampMillis());
                         list.put(obj);
                     }
                     json.put("scores", list);
                     break;        
-                case gamesclient.status_internal_error:
+                case GamesClient.STATUS_INTERNAL_ERROR:
                     // if an unexpected error occurred in the service 
                     break;
-                case gamesclient.status_network_error_stale_data:
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
                     // if the device was unable to communicate with the network. in this case, the operation is not retried automatically.
                     break;
-                case gamesclient.status_client_reconnect_required:
-                    // need to reconnect gamesclient
-                    mhelper.reconnectclients(clienttypes);
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
                     break;
-                case gamesclient.status_license_check_failed:
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
                     // the game is not licensed to the user. further calls will return the same code.
                     break;
                 default:
                     // error
                     break;
             }
-        }catch(jsonexception ex){
-            log.e(tag, "game_leaderboard_scores_loaded ["+statuscode+"] exception: "+ex.getmessage());
+        }catch(JSONException ex){
+            Log.e(TAG, "game_leaderboard_scores_loaded ["+statusCode+"] exception: "+ex.getMessage());
             return;
         }
 
         leaderboard.close();
         scores.close();
-        pluginresult pluginresult = new pluginresult(pluginresult.status.ok, json);
-        pluginresult.setkeepcallback(true);
-        connectioncb.sendpluginresult(pluginresult);
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
     }
 
-    @override
+    @Override
     public void onScoreSubmitted (int statusCode, SubmitScoreResult result){
         JSONObject json = new JSONObject();
         try{
             json.put("type", GAME_SCORES_SUBMITTED);
-            json.put("statusCode", statuscode);
+            json.put("statusCode", statusCode);
             switch (statusCode) {
-                case gamesclient.STATUS_OK:
+                case GamesClient.STATUS_OK:
                     // if data was successfully loaded and is up-to-date.
                     json.put("leaderboardId", result.getLeaderboardId());
                     json.put("playerId", result.getPlayerId());
                     json.put("resultStatusCode", result.getStatusCode());
                     SubmitScoreResult.Result timeResult = result.getScoreResult(LeaderboardVariant.TIME_SPAN_ALL_TIME);
                     JSONObject r = new JSONObject();
-                    r.put("formrtedScore", timeResult.getLeaderboardId());
-                    r.put("newBest", timeResult.getPlayerId());
-                    r.put("rawScore", timeResult.getStrusCode());
+                    r.put("formattedScore", timeResult.formattedScore);
+                    r.put("newBest", timeResult.newBest);
+                    r.put("rawScore", timeResult.rawScore);
                     json.put("timeResult", r);
                     timeResult = result.getScoreResult(LeaderboardVariant.TIME_SPAN_WEEKLY);
                     r = new JSONObject();
-                    r.put("formrtedScore", timeResult.getLeaderboardId());
-                    r.put("newBest", timeResult.getPlayerId());
-                    r.put("rawScore", timeResult.getStrusCode());
+                    r.put("formattedScore", timeResult.formattedScore);
+                    r.put("newBest", timeResult.newBest);
+                    r.put("rawScore", timeResult.rawScore);
                     json.put("weekly", r);
                     timeResult = result.getScoreResult(LeaderboardVariant.TIME_SPAN_DAILY);
                     r = new JSONObject();
-                    r.put("formrtedScore", timeResult.getLeaderboardId());
-                    r.put("newBest", timeResult.getPlayerId());
-                    r.put("rawScore", timeResult.getStrusCode());
+                    r.put("formattedScore", timeResult.formattedScore);
+                    r.put("newBest", timeResult.newBest);
+                    r.put("rawScore", timeResult.rawScore);
                     json.put("daily", r);
                     break;        
                 case GamesClient.STATUS_INTERNAL_ERROR:
