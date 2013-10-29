@@ -313,6 +313,24 @@
     <button id=asList>AppState List</button>
     <button id=asResolve>AppState Resolve</button>
     <button id=asDelete>AppState Delete</button>
+
+    <button id=gamesShowAchievements>Games Show Achievements</button>
+    <button id=gamesShowAllLeaderboards>Games Show Leaderboards</button>
+    <button id=gamesShowLeaderboard>Games Show Leaderboard</button>
+    <button id=gamesIncreAchievement>Games Incre Achievement</button>
+    <button id=gamesIncreAchievementNow>Games Incre Achievement Now</button>
+    <button id=gamesLoadAchievements>Games Load Achievements</button>
+    <button id=gamesLoadGame>Games Load Game</button>
+    <button id=gamesLoadPlayer>Games Load Player</button>
+    <button id=gamesLoadMoreScores>Games Load More Scores</button>
+    <button id=gamesLoadPlayerCenteredScores>Games Load Player Centered Scores</button>
+    <button id=gamesLoadTopScores>Games Load Player Top Scores</button>
+    <button id=gamesRevealAchievement>Games Reveal Achievement</button>
+    <button id=gamesRevealAchievementNow>Games Reveal Achievement Now</button>
+    <button id=gamesSubmitScore>Games Submit Score</button>
+    <button id=gamesSubmitScoreNow>Games Submit Score Now</button>
+    <button id=gamesUnlockAchievement>Games Unlock Achievement</button>
+    <button id=gamesUnlockAchievementNow>Games Unlock Achievement Now</button>
     <p id=gmsStatus></p>
  
  <div id="deviceready"></div>
@@ -458,6 +476,40 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         function onASDelete(e){
             GOOG.appState.deleteState(0);
         }
+        function onShowAchievement(e){
+        }
+        function onShowAllLeaderboards(e){
+        }
+        function onShowLeaderboard(e){
+        }
+        function onIncreAchievement(e){
+        }
+        function onIncreAchievementNow(e){
+        }
+        function onLoadAchievements(e){
+        }
+        function onLoadGame(e){
+        }
+        function onLoadPlayer(e){
+        }
+        function onbtnLoadMoreScores(e){
+        }
+        function onLoadPlayerCenteredScores(e){
+        }
+        function onLoadTopScores(e){
+        }
+        function onRevealAchievement(e){
+        }
+        function onRevealAchievementNow(e){
+        }
+        function onSubmitScore(e){
+        }
+        function onSubmitScoreNow(e){
+        }
+        function onUnlockAchievement(e){
+        }
+        function onUnlockAchievementNow(e){
+        }
 
         GOOG.gms.setup(GOOG.gms.CLIENT_GAMES + GOOG.gms.CLIENT_APPSTATE, null, onConnectionListener);
 
@@ -470,6 +522,23 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         btnList = document.querySelector('button#asList'),
         btnResolve = document.querySelector('button#asResolve'),
         btnDelete = document.querySelector('button#asDelete');
+        btnShowAchievement = document.querySelector('button#gamesShowAchievements');
+        btnShowAllLeaderboards = document.querySelector('button#gamesShowAllLeaderboards');
+        btnShowLeaderboard = document.querySelector('button#gamesShowLeaderboard');
+        btnIncreAchievement = document.querySelector('button#gamesIncreAchievement');
+        btnIncreAchievementNow = document.querySelector('button#gamesIncreAchievementNow');
+        btnLoadAchievements = document.querySelector('button#gamesLoadAchievements');
+        btnLoadGame = document.querySelector('button#gamesLoadGame');
+        btnLoadPlayer = document.querySelector('button#gamesLoadPlayer');
+        btnLoadMoreScores = document.querySelector('button#gamesLoadMoreScores');
+        btnLoadPlayerCenteredScores = document.querySelector('button#gamesLoadPlayerCenteredScores');
+        btnLoadTopScores = document.querySelector('button#gamesLoadTopScores');
+        btnRevealAchievement = document.querySelector('button#gamesRevealAchievement');
+        btnRevealAchievementNow = document.querySelector('button#gamesRevealAchievementNow');
+        btnSubmitScore = document.querySelector('button#gamesSubmitScore');
+        btnSubmitScoreNow = document.querySelector('button#gamesSubmitScoreNow'):
+        btnUnlockAchievement = document.querySelector('button#gamesUnlockAchievement');
+        btnUnlockAchievementNow = document.querySelector('button#gamesUnlockAchievementNow');
 
         btnSignin.addEventListener('click', onSiginClicked, false);
         btnSignout.addEventListener('click', onSignoutClicked, false);
@@ -479,6 +548,23 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         btnList.addEventListener('click', onASList, false);
         btnResolve.addEventListener('click', onASResolve, false);
         btnDelete.addEventListener('click', onASDelete, false);
+        btnShowAchievement.addEventListener('click', onShowAchievement, false);
+        btnShowAllLeaderboards.addEventListener('click', onShowAllLeaderboards, false);
+        btnShowLeaderboard.addEventListener('click', onShowLeaderboard, false);
+        btnIncreAchievement.addEventListener('click', onIncreAchievement, false);
+        btnIncreAchievementNow.addEventListener('click', onIncreAchievementNow, false);
+        btnLoadAchievements.addEventListener('click', onLoadAchievements, false);
+        btnLoadGame.addEventListener('click', onLoadGame, false);
+        btnLoadPlayer.addEventListener('click', onLoadPlayer, false);
+        btnLoadMoreScores.addEventListener('click', onbtnLoadMoreScores, false);
+        btnLoadPlayerCenteredScores.addEventListener('click', onLoadPlayerCenteredScores, false);
+        btnLoadTopScores.addEventListener('click', onLoadTopScores, false);
+        btnRevealAchievement.addEventListener('click', onRevealAchievement, false);
+        btnRevealAchievementNow.addEventListener('click', onRevealAchievementNow, false);
+        btnSubmitScore.addEventListener('click', onSubmitScore, false);
+        btnSubmitScoreNow.addEventListener('click', onSubmitScoreNow, false);
+        btnUnlockAchievement.addEventListener('click', onUnlockAchievement, false);
+        btnUnlockAchievementNow.addEventListener('click', onUnlockAchievementNow, false);
       });
 
   </script>
