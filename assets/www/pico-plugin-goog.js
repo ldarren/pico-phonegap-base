@@ -82,6 +82,23 @@ window.GOOG = {
         }
     },
     games: {
+        // for achievement
+        STATE_HIDDEN: 2,
+        STATE_REVEALED: 1,
+        STATE_UNLOCKED: 0,
+        TYPE_INCREMENTAL: 1,
+        TYPE_STANDARD: 0,
+        // leaderboard
+        COLLECTION_PUBLIC: 0,
+        COLLECTION_SOCIAL: 1,
+        NUM_SCORES_UNKNOWN: -1,
+        NUM_TIME_SPANS: 3,
+        PLAYER_RANK_UNKNOWN: -1,
+        PLAYER_SCORE_UNKNOWN: -1,
+        TIME_SPAN_ALL_TIME: 2,
+        TIME_SPAN_WEEKLY: 1,
+        TIME_SPAN_DAILY: 0,
+        // errors
         STATUS_ACHIEVEMENT_NOT_INCREMENTAL: 3002,
         STATUS_ACHIEVEMENT_UNKNOWN: 3001,
         STATUS_ACHIEVEMENT_UNLOCKED: 3003,

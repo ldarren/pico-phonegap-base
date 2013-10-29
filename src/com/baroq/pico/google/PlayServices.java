@@ -1,4 +1,6 @@
-// ref: http://developer.android.com/google/play/billing/billing_integrate.html
+// ref:
+// http://developer.android.com/google/play/billing/billing_integrate.html
+// http://developer.android.com/reference/com/google/android/gms/games/GamesClient.html
 package com.baroq.pico.google;
 
 import org.apache.cordova.api.CordovaPlugin;
@@ -27,9 +29,11 @@ import com.google.android.gms.games.achievement.AchievementBuffer;
 import com.google.android.gms.games.achievement.Achievement;
 import com.google.android.gms.games.leaderboard.LeaderboardBuffer;
 import com.google.android.gms.games.leaderboard.Leaderboard;
+import com.google.android.gms.games.leaderboard.LeaderboardVariant;
 import com.google.android.gms.games.leaderboard.LeaderboardScoreBuffer;
 import com.google.android.gms.games.leaderboard.LeaderboardScore;
 import com.google.android.gms.games.leaderboard.SubmitScoreResult;
+import com.google.android.gms.games.leaderboard.SubmitScoreResult.Result;
 
 import com.google.android.gms.appstate.OnStateLoadedListener;
 import com.google.android.gms.appstate.OnStateListLoadedListener;
@@ -518,7 +522,7 @@ public class PlayServices   extends     CordovaPlugin
                         game.put("secondaryCategory", g.getSecondaryCategory());
                         games.put(game);
                     }
-                    json.put("games", games);
+                    json.put("list", games);
                     break;        
                 case GamesClient.STATUS_INTERNAL_ERROR:
                     // if an unexpected error occurred in the service 
@@ -575,7 +579,7 @@ public class PlayServices   extends     CordovaPlugin
                         player.put("retrievedTimestamp", p.getRetrievedTimestamp());
                         players.put(player);
                     }
-                    json.put("players", players);
+                    json.put("list", players);
                     break;        
                 case GamesClient.STATUS_INTERNAL_ERROR:
                     // if an unexpected error occurred in the service 
@@ -614,38 +618,31 @@ public class PlayServices   extends     CordovaPlugin
             switch (statusCode) {
                 case GamesClient.STATUS_OK:
                     // if data was successfully loaded and is up-to-date
-abstract String  getAchievementId()
-abstract int     getCurrentSteps()
-abstract String  getDescription()
-abstract String  getFormattedCurrentSteps()
-abstract String  getFormattedTotalSteps()
-abstract long    getLastUpdatedTimestamp()
-abstract String  getName()
-abstract Player  getPlayer()
-abstract int     getState()
-abstract int     getTotalSteps()
-abstract int     getType()
-abstract Uri     getRevealedImageUri()
-abstract Uri     getUnlockedImageUri()
-                    JSONArray players = new JSONArray();
+                    JSONArray achievements = new JSONArray();
                     JSONObject achievement;
                     for(int i=0,l=buffer.getCount(); i<l; i++){
                         Achievement a = buffer.get(i);
                         achievement = new JSONObject();
-                        player.put("displayName", p.getDisplayName());
-                        if (p.hasHiResImage()){
-                            Uri uri = p.getHiResImageUri();
-                            player.put("hiResImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
-                        }
-                        if (p.hasIconImage()){
-                            Uri uri = p.getIconImageUri();
-                            player.put("iconImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
-                        }
-                        player.put("playerId", p.getPlayerId());
-                        player.put("retrievedTimestamp", p.getRetrievedTimestamp());
-                        players.put(player);
+                        achievement.put("achievementId", a.getAchievementId());
+                        achievement.put("currentSteps", a.getCurrentSteps());
+                        achievement.put("description", a.getDescription());
+                        achievement.put("formattedCurrentSteps", a.getFormattedCurrentSteps());
+                        achievement.put("formattedTotalSteps", a.getFormattedTotalSteps());
+                        achievement.put("lastUpdatedTimestamp", a.getLastUpdatedTimestamp());
+                        achievement.put("name", a.getName());
+                        achievement.put("achievementId", a.getPlayer().getPlayerId());
+                        achievement.put("state", a.getState());
+                        achievement.put("totalSteps", a.getTotalSteps());
+                        achievement.put("type", a.getType());
+                        Uri uri = a.getRevealedImageUri();
+                        if (null != uri)
+                            achievement.put("revealedImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        uri = a.getUnlockedImageUri();
+                        if (null != uri)
+                            achievement.put("unlockedImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
+                        achievements.put(achievement);
                     }
-                    json.put("players", players);
+                    json.put("list", achievements);
                     break;        
                 case GamesClient.STATUS_NETWORK_ERROR_NO_DATA:
                     // A network error occurred while attempting to retrieve fresh data, and no data was available locally.
@@ -686,8 +683,12 @@ abstract Uri     getUnlockedImageUri()
             json.put("statusCode", statusCode);
             switch (statusCode) {
                 case GamesClient.STATUS_OK:
-                    // if data was successfully deleted from the server.
+                    // if data was successfully loaded and is up-to-date 
+                    json.put("achievementId", achievementId);
                     break;        
+                case GamesClient.STATUS_NETWORK_ERROR_NO_DATA:
+                    // A network error occurred while attempting to retrieve fresh data, and no data was available locally.
+                    break;
                 case GamesClient.STATUS_INTERNAL_ERROR:
                     // if an unexpected error occurred in the service 
                     break;
@@ -723,52 +724,130 @@ abstract Uri     getUnlockedImageUri()
             json.put("statusCode", statusCode);
             switch (statusCode) {
                 case GamesClient.STATUS_OK:
-                    // if data was successfully deleted from the server.
+                    // if data was successfully loaded and is up-to-date.
+                    JSONArray list = new JSONArray();
+                    JSONObject obj;
+                    JSONArray vList;
+                    JSONObject v;
+                    Leaderboard lb;
+                    ArrayList<LeaderboardVariant> variants;
+                    LeaderboardVariant variant;
+                    int i, l, j, k;
+                    for(i=0,l=leaderboard.getCount();i<l;i++){
+                        obj = new JSONObject();
+                        lb = leaderboard.get(i);
+                        obj.put("displayName", lb.getDisplayName());
+                        Uri uri = lb.getIconImageUri();
+                        if (null != uri)
+                            obj.put("iconImageUri", uri.getScheme() + ':' + uri.getSchemeSpecificPart());
+                        obj.put("leaderboardId", lb.getLeaderboardId());
+                        obj.put("scoreOrder", lb.getScoreOrder());
+                        variants = lb.getVariants();
+                        vList = new JSONArray();
+                        for(j=0,k=variants.size();j<k;j++){
+                            v = new JSONObject();
+                            variant = variant.get(i);
+                            v.put("collection", variant.getCollection());
+                            v.put("numScores", variant.getNumScores());
+                            v.put("timeSpan", variant.getTimeSpan());
+                            v.put("hasPlayerInfo", variant.hasPlayerInfo());
+                            if(variant.hasPlayerInfo()){
+                                v.put("displayPlayerRank", variant.getDisplayPlayerRank());
+                                v.put("displayPlayerScore", variant.getDisplayPlayerScore());
+                                v.put("playerRank", variant.getPlayerRank());
+                                v.put("rawPlayerScore", variant.getRawPlayerScore());
+                            }
+                            vList.put(v);
+                            obj.put("variants", vList);
+                        }
+                        list.put(obj);
+                    }
+                    json.put("leaderboard", list);
+                    for(i=0,l=scores.getcount();i<l;i++){
+                        obj = new JSONObject();
+                        lb = scores.get(i);
+                        obj.put("displayRank", lb.getDisplayRank());
+                        obj.put("displayScore", lb.getDisplayScore());
+                        obj.put("rank", lb.getRank());
+                        obj.put("rawScore", lb.getRawScore());
+                        obj.put("scoreHolderPlayerId", lb.getScoreHolder().getPlayerId());
+                        obj.put("scoreHolderDisplayName", lb.getScoreHolderDisplayName());
+                        Uri uri = lb.getScoreHolderHiResImageUri();
+                        if (null != uri)
+                            obj.put("scoreHolderHiResImageUri", uri.getScheme() + ':' + uri.getSchemeSpecificPart());
+                        uri = lb.getScoreHolderIconImageUri();
+                        if (null != uri)
+                            obj.put("scoreHolderIconImageUri", uri.getScheme() + ':' + uri.getSchemeSpecificPart());
+                        obj.put("timestampMillis", lb.getTimestampMillis());
+                        list.put(obj);
+                    }
+                    json.put("scores", list);
                     break;        
-                case GamesClient.STATUS_INTERNAL_ERROR:
+                case gamesclient.status_internal_error:
                     // if an unexpected error occurred in the service 
                     break;
-                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
-                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                case gamesclient.status_network_error_stale_data:
+                    // if the device was unable to communicate with the network. in this case, the operation is not retried automatically.
                     break;
-                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
-                    // need to reconnect GamesClient
-                    mHelper.reconnectClients(clientTypes);
+                case gamesclient.status_client_reconnect_required:
+                    // need to reconnect gamesclient
+                    mhelper.reconnectclients(clienttypes);
                     break;
-                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
-                    // The game is not licensed to the user. Further calls will return the same code.
+                case gamesclient.status_license_check_failed:
+                    // the game is not licensed to the user. further calls will return the same code.
                     break;
                 default:
                     // error
                     break;
             }
-        }catch(JSONException ex){
-            Log.e(TAG, "GAME_LEADERBOARD_SCORES_LOADED ["+statusCode+"] exception: "+ex.getMessage());
+        }catch(jsonexception ex){
+            log.e(tag, "game_leaderboard_scores_loaded ["+statuscode+"] exception: "+ex.getmessage());
             return;
         }
 
         leaderboard.close();
         scores.close();
-        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
-        pluginResult.setKeepCallback(true);
-        connectionCB.sendPluginResult(pluginResult);
+        pluginresult pluginresult = new pluginresult(pluginresult.status.ok, json);
+        pluginresult.setkeepcallback(true);
+        connectioncb.sendpluginresult(pluginresult);
     }
 
-    @Override
+    @override
     public void onScoreSubmitted (int statusCode, SubmitScoreResult result){
         JSONObject json = new JSONObject();
         try{
             json.put("type", GAME_SCORES_SUBMITTED);
-            json.put("statusCode", statusCode);
+            json.put("statusCode", statuscode);
             switch (statusCode) {
-                case GamesClient.STATUS_OK:
-                    // if data was successfully deleted from the server.
+                case gamesclient.STATUS_OK:
+                    // if data was successfully loaded and is up-to-date.
+                    json.put("leaderboardId", result.getLeaderboardId());
+                    json.put("playerId", result.getPlayerId());
+                    json.put("resultStatusCode", result.getStatusCode());
+                    SubmitScoreResult.Result timeResult = result.getScoreResult(LeaderboardVariant.TIME_SPAN_ALL_TIME);
+                    JSONObject r = new JSONObject();
+                    r.put("formrtedScore", timeResult.getLeaderboardId());
+                    r.put("newBest", timeResult.getPlayerId());
+                    r.put("rawScore", timeResult.getStrusCode());
+                    json.put("timeResult", r);
+                    timeResult = result.getScoreResult(LeaderboardVariant.TIME_SPAN_WEEKLY);
+                    r = new JSONObject();
+                    r.put("formrtedScore", timeResult.getLeaderboardId());
+                    r.put("newBest", timeResult.getPlayerId());
+                    r.put("rawScore", timeResult.getStrusCode());
+                    json.put("weekly", r);
+                    timeResult = result.getScoreResult(LeaderboardVariant.TIME_SPAN_DAILY);
+                    r = new JSONObject();
+                    r.put("formrtedScore", timeResult.getLeaderboardId());
+                    r.put("newBest", timeResult.getPlayerId());
+                    r.put("rawScore", timeResult.getStrusCode());
+                    json.put("daily", r);
                     break;        
                 case GamesClient.STATUS_INTERNAL_ERROR:
                     // if an unexpected error occurred in the service 
                     break;
-                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
-                    // if the device was unable to communicate with the network. In this case, the operation is not retried automatically.
+                case GamesClient.STATUS_NETWORK_ERROR_OPERATION_DEFERRED:
+                    // if the device is offline or was otherwise unable to post the score to the server. The score was stored locally and will be posted to the server the next time the device is online and is able to perform a sync (no further action is required from the client).
                     break;
                 case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
                     // need to reconnect GamesClient
