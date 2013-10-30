@@ -322,8 +322,8 @@
     <button id=gamesLoadAchievements>Games Load Achievements</button>
     <button id=gamesLoadGame>Games Load Game</button>
     <button id=gamesLoadPlayer>Games Load Player</button>
-    <button id=gamesloadLeaderboardMetadata>Games Leaderboard</button>
-    <button id=gamesloadLeaderboardMetadata1>Games Leaderboard 1</button>
+    <button id=gamesLoadLeaderboardMetadata>Games Load Leaderboard</button>
+    <button id=gamesLoadLeaderboardMetadata1>Games Load Leaderboard 1</button>
     <button id=gamesLoadMoreScores>Games Load More Scores</button>
     <button id=gamesLoadPlayerCenteredScores>Games Load Player Centered Scores</button>
     <button id=gamesLoadTopScores>Games Load Player Top Scores</button>
@@ -494,7 +494,7 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         }
         function onShowLeaderboard(e){
             console.log('onShowLeaderboard');
-            GOOG.games.getLeaderboardIntent('1');
+            GOOG.games.getLeaderboardIntent('CgkI3ob9060fEAIQBw');
         }
         function onIncreAchievement(e){
             console.log('onIncreAchievement');
@@ -514,7 +514,7 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         }
         function onLoadPlayer(e){
             console.log('onLoadPlayer');
-            GOOG.games.loadPlayer('123');
+            GOOG.games.loadPlayer('110313750975838981251');
         }
         function onLoadLeaderboardMetadata(e){
             console.log('onLoadLeaderboardMetadata');
@@ -522,7 +522,7 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         }
         function onLoadLeaderboardMetadata1(e){
             console.log('onLoadLeaderboardMetadata');
-            GOOG.games.loadLeaderboardMetadata('123', true);
+            GOOG.games.loadLeaderboardMetadata('CgkI3ob9060fEAIQBw', true);
         }
         function onbtnLoadMoreScores(e){
             console.log('onbtnLoadMoreScores');
@@ -530,11 +530,11 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         }
         function onLoadPlayerCenteredScores(e){
             console.log('onLoadPlayerCenteredScores');
-            GOOG.games.loadPlayerCenteredScores('123', 10, 1, 10, true);
+            GOOG.games.loadPlayerCenteredScores('CgkI3ob9060fEAIQBw', GOOG.games.TIME_SPAN_DAILY, 1, 10, true);
         }
         function onLoadTopScores(e){
             console.log('onLoadTopScores');
-            GOOG.games.loadTopScores('123', 10, 1, 10, true);
+            GOOG.games.loadTopScores('CgkI3ob9060fEAIQBw', GOOG.games.TIME_SPAN_WEEKLY, 1, 10, true);
         }
         function onRevealAchievement(e){
             console.log('onRevealAchievement');
@@ -546,11 +546,11 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         }
         function onSubmitScore(e){
             console.log('onSubmitScore');
-            GOOG.games.submitScore('123', 1);
+            GOOG.games.submitScore('CgkI3ob9060fEAIQBw', 1);
         }
         function onSubmitScoreNow(e){
             console.log('onSubmitScoreNow');
-            GOOG.games.submitScoreImmediate('123', 1);
+            GOOG.games.submitScoreImmediate('CgkI3ob9060fEAIQBw', 1);
         }
         function onUnlockAchievement(e){
             console.log('onUnlockAchievement');
@@ -580,8 +580,8 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         btnLoadAchievements = document.querySelector('button#gamesLoadAchievements');
         btnLoadGame = document.querySelector('button#gamesLoadGame');
         btnLoadPlayer = document.querySelector('button#gamesLoadPlayer');
-        btnLoadLeaderboardMetadata = document.querySelector('button#loadLeaderboardMetadata');
-        btnLoadLeaderboardMetadata1 = document.querySelector('button#loadLeaderboardMetadata1');
+        btnLoadLeaderboardMetadata = document.querySelector('button#gamesLoadLeaderboardMetadata');
+        btnLoadLeaderboardMetadata1 = document.querySelector('button#gamesLoadLeaderboardMetadata1');
         btnLoadMoreScores = document.querySelector('button#gamesLoadMoreScores');
         btnLoadPlayerCenteredScores = document.querySelector('button#gamesLoadPlayerCenteredScores');
         btnLoadTopScores = document.querySelector('button#gamesLoadTopScores');

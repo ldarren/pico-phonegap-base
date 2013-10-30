@@ -141,43 +141,31 @@ window.GOOG = {
             cordova.exec(function(){},function(){},'PlayServices', 'loadPlayer', [playerId]);
         },
         loadLeaderboardMetadata: function(){
-            cordova.exec(function(){},function(){},'PlayServices', 'loadLeaderboardMetadata', Array.slice(arguments));
+            cordova.exec(function(){},function(){},'PlayServices', 'loadLeaderboardMetadata', Array.prototype.slice.call(arguments));
         },
         loadPlayerCenteredScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload){
-            cordova.exec(function(){},function(err){},'PlayServices', 'loadPlayerCenteredScores', Array.slice(arguments));
+            cordova.exec(function(){},function(err){},'PlayServices', 'loadPlayerCenteredScores', Array.prototype.slice.call(arguments));
         },
         loadTopScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload){
-            cordova.exec(function(){},function(err){},'PlayServices', 'loadTopScores', Array.slice(arguments));
+            cordova.exec(function(){},function(err){},'PlayServices', 'loadTopScores', Array.prototype.slice.call(arguments));
         },
         revealAchievement: function(id){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'revealAchievement', [id]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'revealAchievement', [id]);
         },
         revealAchievementImmediate: function(id){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'revealAchievementImmediate', [id]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'revealAchievementImmediate', [id]);
         },
         submitScore: function(leaderboardId, score){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'submitScore', [leaderboardId, score]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'submitScore', [leaderboardId, score]);
         },
         submitScoreImmediate: function(leaderboardId, score){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'submitScoreImmediate', [leaderboardId, score]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'submitScoreImmediate', [leaderboardId, score]);
         },
         unlockAchievement: function(id){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'unlockAchievement', [id]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'unlockAchievement', [id]);
         },
         unlockAchievementImmediate: function(id){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'unlockAchievementImmediate', [id]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'unlockAchievementImmediate', [id]);
         }
     },
     appState:{
