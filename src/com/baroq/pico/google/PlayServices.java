@@ -42,6 +42,7 @@ import com.google.android.gms.appstate.OnStateDeletedListener;
 import com.google.android.gms.games.achievement.OnAchievementUpdatedListener;
 import com.google.android.gms.games.achievement.OnAchievementsLoadedListener;
 import com.google.android.gms.games.OnGamesLoadedListener;
+import com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener;
 import com.google.android.gms.games.leaderboard.OnLeaderboardScoresLoadedListener;
 import com.google.android.gms.games.OnPlayersLoadedListener;
 import com.google.android.gms.games.leaderboard.OnScoreSubmittedListener;
@@ -60,6 +61,7 @@ public class PlayServices   extends     CordovaPlugin
                                         OnAchievementUpdatedListener,
                                         OnAchievementsLoadedListener,
                                         OnGamesLoadedListener,
+                                        OnLeaderboardMetadataLoadedListener,
                                         OnLeaderboardScoresLoadedListener,
                                         OnPlayersLoadedListener,
                                         OnScoreSubmittedListener{
@@ -86,6 +88,7 @@ public class PlayServices   extends     CordovaPlugin
     private static final String ACTION_GAME_INCR_ACHIEVEMENT_NOW = "incrementAchievementImmediate";
     private static final String ACTION_GAME_LOAD_ACHIEVEMENTS = "loadAchievements";
     private static final String ACTION_GAME_LOAD_GAME = "loadGame";
+    private static final String ACTION_GAME_LOAD_LEADERBOARD_METADATA = "loadLeaderboardMetadata";
     private static final String ACTION_GAME_LOAD_MORE_SCORES = "loadMoreScores";
     private static final String ACTION_GAME_LOAD_PLAYER = "loadPlayer";
     private static final String ACTION_GAME_LOAD_PLAYER_CENTERED_SCORES = "loadPlayerCenteredScores";
@@ -106,8 +109,12 @@ public class PlayServices   extends     CordovaPlugin
     private static final int PLAYER_LOADED = 7;
     private static final int GAME_ACHIEVEMENT_LOADED = 8;
     private static final int GAME_ACHIEVEMENT_UPDATED = 9;
-    private static final int GAME_LEADERBOARD_SCORES_LOADED = 10;
-    private static final int GAME_SCORES_SUBMITTED = 11;
+    private static final int GAME_LEADERBOARD_METADATA_LOADED = 10;
+    private static final int GAME_LEADERBOARD_SCORES_LOADED = 11;
+    private static final int GAME_SCORES_SUBMITTED = 12;
+
+    // request codes we use when invoking an external activity
+    final int RC_RESOLVE = 5000, RC_UNUSED = 5001;
 
     GmsHelper mHelper;
     CallbackContext connectionCB;
@@ -180,14 +187,14 @@ public class PlayServices   extends     CordovaPlugin
                 mHelper.getAppStateClient().updateStateImmediate(this, key, value.getBytes());
                 callbackContext.success();
             }else if (ACTION_GAME_SHOW_ACHIEVEMENTS.equals(action)){
-                mHelper.getGamesClient().getAchievementsIntent();
+                cordova.startActivityForResult((CordovaPlugin)this, mHelper.getGamesClient().getAchievementsIntent(), RC_UNUSED);
                 callbackContext.success();
             }else if (ACTION_GAME_SHOW_LEADERBOARDS.equals(action)){
-                mHelper.getGamesClient().getAllLeaderboardsIntent();
+                cordova.startActivityForResult((CordovaPlugin)this, mHelper.getGamesClient().getAllLeaderboardsIntent(), RC_UNUSED);
                 callbackContext.success();
             }else if (ACTION_GAME_SHOW_LEADERBOARD.equals(action)){
                 String id = data.getString(0);
-                mHelper.getGamesClient().getLeaderboardIntent(id);
+                cordova.startActivityForResult((CordovaPlugin)this, mHelper.getGamesClient().getLeaderboardIntent(id), RC_UNUSED);
                 callbackContext.success();
             }else if (ACTION_GAME_INCR_ACHIEVEMENT.equals(action)){
                 String id = data.getString(0);
@@ -205,6 +212,13 @@ public class PlayServices   extends     CordovaPlugin
                 callbackContext.success();
             }else if (ACTION_GAME_LOAD_GAME.equals(action)){
                 mHelper.getGamesClient().loadGame(this);
+                callbackContext.success();
+            }else if (ACTION_GAME_LOAD_LEADERBOARD_METADATA.equals(action)){
+                if (1 == data.length()){
+                    mHelper.getGamesClient().loadLeaderboardMetadata(this, data.getBoolean(0));
+                }else{
+                    mHelper.getGamesClient().loadLeaderboardMetadata(this, data.getString(0), data.getBoolean(1));
+                }
                 callbackContext.success();
             }else if (ACTION_GAME_LOAD_MORE_SCORES.equals(action)){
                 if (null == scoreBuffer){
@@ -627,20 +641,23 @@ public class PlayServices   extends     CordovaPlugin
                     // if data was successfully loaded and is up-to-date
                     JSONArray achievements = new JSONArray();
                     JSONObject achievement;
+                    Achievement a;
                     for(int i=0,l=buffer.getCount(); i<l; i++){
-                        Achievement a = buffer.get(i);
+                        a = buffer.get(i);
                         achievement = new JSONObject();
                         achievement.put("achievementId", a.getAchievementId());
-                        achievement.put("currentSteps", a.getCurrentSteps());
                         achievement.put("description", a.getDescription());
-                        achievement.put("formattedCurrentSteps", a.getFormattedCurrentSteps());
-                        achievement.put("formattedTotalSteps", a.getFormattedTotalSteps());
                         achievement.put("lastUpdatedTimestamp", a.getLastUpdatedTimestamp());
                         achievement.put("name", a.getName());
                         achievement.put("achievementId", a.getPlayer().getPlayerId());
                         achievement.put("state", a.getState());
-                        achievement.put("totalSteps", a.getTotalSteps());
                         achievement.put("type", a.getType());
+                        if (Achievement. TYPE_INCREMENTAL == a.getType()){
+                            achievement.put("currentSteps", a.getCurrentSteps());
+                            achievement.put("totalSteps", a.getTotalSteps());
+                            achievement.put("formattedCurrentSteps", a.getFormattedCurrentSteps());
+                            achievement.put("formattedTotalSteps", a.getFormattedTotalSteps());
+                        }
                         Uri uri = a.getRevealedImageUri();
                         if (null != uri)
                             achievement.put("revealedImageUri", uri.getScheme()+':'+uri.getSchemeSpecificPart());
@@ -718,6 +735,82 @@ public class PlayServices   extends     CordovaPlugin
             return;
         }
 
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
+        pluginResult.setKeepCallback(true);
+        connectionCB.sendPluginResult(pluginResult);
+    }
+
+    @Override
+    public void onLeaderboardMetadataLoaded (int statusCode, LeaderboardBuffer leaderboard){
+        JSONObject json = new JSONObject();
+        try{
+            json.put("type", GAME_LEADERBOARD_METADATA_LOADED);
+            json.put("statusCode", statusCode);
+            switch (statusCode) {
+                case GamesClient.STATUS_OK:
+                    // if data was successfully loaded and is up-to-date.
+                    JSONArray list = new JSONArray();
+                    JSONObject obj;
+                    JSONArray vList;
+                    JSONObject v;
+                    Leaderboard lb;
+                    ArrayList<LeaderboardVariant> variants;
+                    LeaderboardVariant variant;
+                    int i, l, j, k;
+                    for(i=0,l=leaderboard.getCount();i<l;i++){
+                        obj = new JSONObject();
+                        lb = leaderboard.get(i);
+                        obj.put("displayName", lb.getDisplayName());
+                        Uri uri = lb.getIconImageUri();
+                        if (null != uri)
+                            obj.put("iconImageUri", uri.getScheme() + ':' + uri.getSchemeSpecificPart());
+                        obj.put("leaderboardId", lb.getLeaderboardId());
+                        obj.put("scoreOrder", lb.getScoreOrder());
+                        variants = lb.getVariants();
+                        vList = new JSONArray();
+                        for(j=0,k=variants.size();j<k;j++){
+                            v = new JSONObject();
+                            variant = variants.get(i);
+                            v.put("collection", variant.getCollection());
+                            v.put("numScores", variant.getNumScores());
+                            v.put("timeSpan", variant.getTimeSpan());
+                            v.put("hasPlayerInfo", variant.hasPlayerInfo());
+                            if(variant.hasPlayerInfo()){
+                                v.put("displayPlayerRank", variant.getDisplayPlayerRank());
+                                v.put("displayPlayerScore", variant.getDisplayPlayerScore());
+                                v.put("playerRank", variant.getPlayerRank());
+                                v.put("rawPlayerScore", variant.getRawPlayerScore());
+                            }
+                            vList.put(v);
+                            obj.put("variants", vList);
+                        }
+                        list.put(obj);
+                    }
+                    json.put("leaderboard", list);
+                    break;        
+                case GamesClient.STATUS_INTERNAL_ERROR:
+                    // if an unexpected error occurred in the service 
+                    break;
+                case GamesClient.STATUS_NETWORK_ERROR_STALE_DATA:
+                    // if the device was unable to communicate with the network. in this case, the operation is not retried automatically.
+                    break;
+                case GamesClient.STATUS_CLIENT_RECONNECT_REQUIRED:
+                    // need to reconnect GamesClient
+                    mHelper.reconnectClients(clientTypes);
+                    break;
+                case GamesClient.STATUS_LICENSE_CHECK_FAILED:
+                    // the game is not licensed to the user. further calls will return the same code.
+                    break;
+                default:
+                    // error
+                    break;
+            }
+        }catch(JSONException ex){
+            Log.e(TAG, "game_leaderboard_scores_loaded ["+statusCode+"] exception: "+ex.getMessage());
+            return;
+        }
+
+        leaderboard.close();
         PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, json);
         pluginResult.setKeepCallback(true);
         connectionCB.sendPluginResult(pluginResult);

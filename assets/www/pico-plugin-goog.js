@@ -63,8 +63,9 @@ window.GOOG = {
         PLAYER_LOADED: 7,
         GAME_ACHIEVEMENT_LOADED: 8,
         GAME_ACHIEVEMENT_UPDATED: 9,
-        GAME_LEADERBOARD_SCORES_LOADED: 10,
-        GAME_SCORES_SUBMITTED: 11,
+        GAME_LEADERBOARD_METADATA_LOADED: 10,
+        GAME_LEADERBOARD_SCORES_LOADED: 11,
+        GAME_SCORES_SUBMITTED: 12,
 
         setup: function(clientCode, extraScopes, listener){
             var params = extraScopes || [];
@@ -139,15 +140,14 @@ window.GOOG = {
         loadPlayer: function(playerId){
             cordova.exec(function(){},function(){},'PlayServices', 'loadPlayer', [playerId]);
         },
+        loadLeaderboardMetadata: function(){
+            cordova.exec(function(){},function(){},'PlayServices', 'loadLeaderboardMetadata', Array.slice(arguments));
+        },
         loadPlayerCenteredScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'loadPlayerCenteredScores', [leaderboardId, span, leaderboardCollection, maxResults, forceReload]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'loadPlayerCenteredScores', Array.slice(arguments));
         },
         loadTopScores: function(leaderboardId, span, leaderboardCollection, maxResults, forceReload){
-            cordova.exec(
-                function(){},function(err){},
-                'PlayServices', 'loadTopScores', [leaderboardId, span, leaderboardCollection, maxResults, forceReload]);
+            cordova.exec(function(){},function(err){},'PlayServices', 'loadTopScores', Array.slice(arguments));
         },
         revealAchievement: function(id){
             cordova.exec(
