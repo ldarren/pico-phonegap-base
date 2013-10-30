@@ -426,17 +426,23 @@ console.log('onConnectionListener: '+JSON.stringify(result));
                 case GOOG.gms.STATE_DELETED:
                     gmsStatus.innerHTML = 'STATE_DELETED: '+JSON.stringify(result);
                     break;
-                case GOOG.games.STATE_ACHIEVEMENT_LOADED:
+                case GOOG.gms.GAMES_LOADED:
+                    gmsStatus.innerHTML = 'GOOG.gms.GAMES_LOADED: '+JSON.stringify(result);
                     break;
-                case GOOG.games.STATE_ACHIEVEMENT_UPDATED:
+                case GOOG.gms.PLAYER_LOADED:
+                    gmsStatus.innerHTML = 'GOOG.gms.PLAYER_LOADED: '+JSON.stringify(result);
                     break;
-                case GOOG.games.STATE_GAMES_LAODED:
+                case GOOG.gms.GAME_ACHIEVEMENT_LOADED:
+                    gmsStatus.innerHTML = 'GOOG.gms.GAME_ACHIEVEMENT_LOADED: '+JSON.stringify(result);
                     break;
-                case GOOG.games.STATE_LEADERBOARD_SCORES_LOADED:
+                case GOOG.gms.GAME_ACHIEVEMENT_UPDATED:
+                    gmsStatus.innerHTML = 'GOOG.gms.GAME_ACHIEVEMENT_UPDATED: '+JSON.stringify(result);
                     break;
-                case GOOG.games.STATE_PLAYER_LOADED:
+                case GOOG.gms.GAME_LEADERBOARD_SCORES_LOADED:
+                    gmsStatus.innerHTML = 'GOOG.gms.GAME_LEADERBOARD_SCORES_LOADED: '+JSON.stringify(result);
                     break;
-                case GOOG.games.STATE_SCORES_SUBMITTED:
+                case GOOG.gms.GAME_SCORES_SUBMITTED:
+                    gmsStatus.innerHTML = 'GOOG.gms.GAME_SCORES_SUBMITTED: '+JSON.stringify(result);
                     break;
             }
         }
@@ -477,38 +483,72 @@ console.log('onConnectionListener: '+JSON.stringify(result));
             GOOG.appState.deleteState(0);
         }
         function onShowAchievement(e){
+            console.log('onShowAchievement');
+            GOOG.games.getAchievementsIntent();
         }
         function onShowAllLeaderboards(e){
+            console.log('onShowAllLeaderboards');
+            GOOG.games.getAllLeaderboardsIntent();
         }
         function onShowLeaderboard(e){
+            console.log('onShowLeaderboard');
+            GOOG.games.getLeaderboardIntent('1');
         }
         function onIncreAchievement(e){
+            console.log('onIncreAchievement');
+            GOOG.games.incrementAchievement('1', 1);
         }
         function onIncreAchievementNow(e){
+            console.log('onIncreAchievementNow');
+            GOOG.games.incrementAchievementImmediate('1', 1);
         }
         function onLoadAchievements(e){
+            console.log('onLoadAchievements');
+            GOOG.games.loadAchievements(true);
         }
         function onLoadGame(e){
+            console.log('onLoadGame');
+            GOOG.games.loadGame();
         }
         function onLoadPlayer(e){
+            console.log('onLoadPlayer');
+            GOOG.games.loadPlayer('123');
         }
         function onbtnLoadMoreScores(e){
+            console.log('onbtnLoadMoreScores');
+            GOOG.games.loadMoreScores(10, 1);
         }
         function onLoadPlayerCenteredScores(e){
+            console.log('onLoadPlayerCenteredScores');
+            GOOG.games.loadPlayerCenteredScores('123', 10, 1, 10, true);
         }
         function onLoadTopScores(e){
+            console.log('onLoadTopScores');
+            GOOG.games.loadTopScores('123', 10, 1, 10, true);
         }
         function onRevealAchievement(e){
+            console.log('onRevealAchievement');
+            GOOG.games.revealAchievement('123');
         }
         function onRevealAchievementNow(e){
+            console.log('onRevealAchievementNow');
+            GOOG.games.revealAchievementImmediate('123');
         }
         function onSubmitScore(e){
+            console.log('onSubmitScore');
+            GOOG.games.submitScore('123', 1);
         }
         function onSubmitScoreNow(e){
+            console.log('onSubmitScoreNow');
+            GOOG.games.submitScoreImmediate('123', 1);
         }
         function onUnlockAchievement(e){
+            console.log('onUnlockAchievement');
+            GOOG.games.unlockAchievement('123');
         }
         function onUnlockAchievementNow(e){
+            console.log('onUnlockAchievementNow');
+            GOOG.games.unlockAchievementImmediate('123');
         }
 
         GOOG.gms.setup(GOOG.gms.CLIENT_GAMES + GOOG.gms.CLIENT_APPSTATE, null, onConnectionListener);
@@ -536,7 +576,7 @@ console.log('onConnectionListener: '+JSON.stringify(result));
         btnRevealAchievement = document.querySelector('button#gamesRevealAchievement');
         btnRevealAchievementNow = document.querySelector('button#gamesRevealAchievementNow');
         btnSubmitScore = document.querySelector('button#gamesSubmitScore');
-        btnSubmitScoreNow = document.querySelector('button#gamesSubmitScoreNow'):
+        btnSubmitScoreNow = document.querySelector('button#gamesSubmitScoreNow');
         btnUnlockAchievement = document.querySelector('button#gamesUnlockAchievement');
         btnUnlockAchievementNow = document.querySelector('button#gamesUnlockAchievementNow');
 
