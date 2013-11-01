@@ -25,7 +25,7 @@ import java.util.List;
 
 public class InAppBilling extends CordovaPlugin{
     private static final String TAG = "PICO-GOOG-IAP";
-    private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjcEwb3v85kNAHteS6kwksgJDHuHGgH+2GXLaBN48g72L9pdptK4WKpAYYL1S0EvwnlvgP7/baVzGLBEkNoCABC/8LsF1VQzwcO4U61wJGOwn4YOYkV+UhHtLi9Sx7ymAc7ZJmJWMXIADTssL7s/Yk2maM9yDWsj1mY8eAlwbUSeWiKKNP4jQMSpN4tKNlWSdw3GEr7kJ+e/6cWOTs4K9bZM/q+TtOZ0jM/LWMS8FrszQxq5C+tT1+dyoBiuiA/HKuXuyZ3rRicThepR5tCJeZXAKfUKpeQLDFKgTAyJnRt8ZE2mVBofV/Mkjjfqbs5KPrvhEUU96j9kygOr2WR2zXwIDAQAB";
+    private static final String PUBLIC_KEY = "GET_THIS_FROM_GOOGLE_PLAY_DEVELOPER_CONSOLE_SERVICES_AND_API";
     
     private static final int ACT_CB_IAP = 10001;
     private static final int ACT_CB_SUB = 10002;
