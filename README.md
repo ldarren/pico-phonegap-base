@@ -12,6 +12,7 @@ Base phonegap (2.9) application for pico framework
 
 ##Setup
 This setup guide assume that you have an app in google play developer console and an app in facebook app developer console, if not please visit [Google Play Game Services](https://developers.google.com/games/services/console/enabling) and [Facebook Android App Guide](https://developers.facebook.com/docs/android/getting-started/)
+
 1. git clone https://github.com/ldarren/pico-phonegap-base.git .
 2. vi ant.properties
     * key.store=path/to/my.keystore
