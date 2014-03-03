@@ -10,7 +10,7 @@ Base phonegap (2.9) application for pico framework
 4. Google Leaderboard phonegap plugin
 5. Google Achievement phonegap plugin
 
-##Setup
+##Android App Setup
 This setup guide assume that you have an app in google play developer console and an app in facebook app developer console, if not please visit [Google Play Game Services](https://developers.google.com/games/services/console/enabling) and [Facebook Android App Guide](https://developers.facebook.com/docs/android/getting-started/)
 
 1. git clone https://github.com/ldarren/pico-phonegap-base.git .
@@ -21,8 +21,15 @@ This setup guide assume that you have an app in google play developer console an
     * key.store=path/to/my.keystore
     * key.alias=mykeystore
 5. vi res/values/ids.xml
-    * change app_id, get it from [Google Play Developer Console](https://play.google.com) -> Game Services -> Select your game -> should show on title
+    * change app_id, get it from [Google Play Developer Console](https://play.google.com/apps/publish/) -> Game Services -> Select your game -> should show on title
 6. vi src/com/baroq/pico/google/InAppBilling.java
-    * change public key, get it from [Google Play Developer Console](https://play.google.com) -> All Applications -> Select your game -> Services & API
+    * change public key, get it from [Google Play Developer Console](https://play.google.com/apps/publish/) -> All Applications -> Select your game -> Services & API
 7. vi asset/www/index.html
-    * change FB.init(APP_ID), get it from [Facebook Developer](https://developers.facebook.com)
+    * change FB.init(FB_APP_ID), get it from [Facebook Developer](https://developers.facebook.com)
+
+##Facebook Config
+1. keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore | openssl sha1 -binary | openssl base64
+    * password: android
+    * copy and paste the hash key to your facebook app setting
+##Google In App Billing Config
+##Google Game Services Config
