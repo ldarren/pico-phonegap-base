@@ -251,8 +251,8 @@ public class ConnectPlugin extends Plugin {
        }
 
        public void onCancel() {
-           Log.d(TAG, "cancel");
-           this.fba.error("Cancelled", this.fba.callbackId);
+           Log.d(TAG, "FBConnect UIDialogListener cancel");
+           // this.fba.error("Cancelled", this.fba.callbackId);
        }
 	}
 
@@ -307,8 +307,8 @@ public class ConnectPlugin extends Plugin {
         }
 
         public void onCancel() {
-            Log.d(TAG, "cancel");
-            this.fba.error("Cancelled", this.fba.callbackId);
+            Log.d(TAG, "FBConnect AuthorizeListener cancel");
+            //this.fba.error("Cancelled", this.fba.callbackId);
         }
     }
 }
