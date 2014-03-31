@@ -74,12 +74,12 @@ public class PlayServices   extends     CordovaPlugin
 
     private static final String ACTION_AS_MAX_KEYS = "getMaxNumKeys";
     private static final String ACTION_AS_MAX_SIZE = "getMaxStateSize";
-    private static final String ACTION_AS_STATE_DEL = "deleteState";
-    private static final String ACTION_AS_STATE_LIST = "listStates";
-    private static final String ACTION_AS_STATE_LOAD = "loadState";
-    private static final String ACTION_AS_STATE_RESOLVE = "resolveState";
-    private static final String ACTION_AS_STATE_UPDATE = "updateState";
-    private static final String ACTION_AS_STATE_UPDATE_NOW = "updateStateImmediate";
+    private static final String ACTION_AS_DEL = "deleteState";
+    private static final String ACTION_AS_LIST = "listStates";
+    private static final String ACTION_AS_LOAD = "loadState";
+    private static final String ACTION_AS_RESOLVE = "resolveState";
+    private static final String ACTION_AS_UPDATE = "updateState";
+    private static final String ACTION_AS_UPDATE_NOW = "updateStateImmediate";
     
     private static final String ACTION_GAME_SHOW_ACHIEVEMENTS = "getAchievementsIntent";
     private static final String ACTION_GAME_SHOW_LEADERBOARDS = "getAllLeaderboardsIntent";
@@ -159,29 +159,29 @@ public class PlayServices   extends     CordovaPlugin
                 PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, mHelper.getAppStateClient().getMaxStateSize());
                 pluginResult.setKeepCallback(false);
                 callbackContext.sendPluginResult(pluginResult);
-            }else if (ACTION_AS_STATE_DEL.equals(action)){
+            }else if (ACTION_AS_DEL.equals(action)){
                 int key = data.getInt(0);
                 mHelper.getAppStateClient().deleteState(this, key);
                 callbackContext.success();
-            }else if (ACTION_AS_STATE_LIST.equals(action)){
+            }else if (ACTION_AS_LIST.equals(action)){
                 mHelper.getAppStateClient().listStates(this);
                 callbackContext.success();
-            }else if (ACTION_AS_STATE_LOAD.equals(action)){
+            }else if (ACTION_AS_LOAD.equals(action)){
                 int key = data.getInt(0);
                 mHelper.getAppStateClient().loadState(this, key);
                 callbackContext.success();
-            }else if (ACTION_AS_STATE_RESOLVE.equals(action)){
+            }else if (ACTION_AS_RESOLVE.equals(action)){
                 int key = data.getInt(0);
                 String resolvedVersion = data.getString(1);
                 String value = data.getString(2);
                 mHelper.getAppStateClient().resolveState(this, key, resolvedVersion, value.getBytes());
                 callbackContext.success();
-            }else if (ACTION_AS_STATE_UPDATE.equals(action)){
+            }else if (ACTION_AS_UPDATE.equals(action)){
                 int key = data.getInt(0);
                 String value= data.getString(1);
                 mHelper.getAppStateClient().updateState(key, value.getBytes());
                 callbackContext.success();
-            }else if (ACTION_AS_STATE_UPDATE_NOW.equals(action)){
+            }else if (ACTION_AS_UPDATE_NOW.equals(action)){
                 int key = data.getInt(0);
                 String value = data.getString(1);
                 mHelper.getAppStateClient().updateStateImmediate(this, key, value.getBytes());
@@ -354,7 +354,7 @@ public class PlayServices   extends     CordovaPlugin
                 case AppStateClient.STATUS_OK:
                     // Data was successfully loaded from the cloud: merge with local data.
                     json.put("stateKey", stateKey);
-                    json.put("data", new JSONObject(new String(localData)));
+                    json.put("data", new String(localData));
                     break;        
                 case AppStateClient.STATUS_STATE_KEY_NOT_FOUND:
                     // key not found means there is no saved data. To us, this is the same as
